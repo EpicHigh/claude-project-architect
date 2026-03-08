@@ -1,0 +1,22 @@
+{
+  "name": "project-architect",
+  "version": "0.1.0",
+  "description": "Analyze any codebase and generate Claude Code configuration — CLAUDE.md, commands, skills, agents, hooks — tailored to your project.",
+  "author": {
+    "name": "EpicHigh",
+    "url": "https://github.com/EpicHigh"
+  },
+  "repository": "https://github.com/EpicHigh/project-architect",
+  "license": "MIT",
+  "keywords": [
+    "project-setup",
+    "code-analysis",
+    "commands",
+    "skills",
+    "agents",
+    "hooks",
+    "configuration"
+  ],
+  "commands": ["./commands/project-architect.md"],
+  "skills": ["./skills/project-scanner"]
+}
