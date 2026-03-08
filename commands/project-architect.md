@@ -163,7 +163,7 @@ Organize the output as follows:
 
 1. **CLAUDE.md** — show the file path
 2. **Commands** — list each as `/command-name` with its one-line description
-3. **Skills** — list each skill name with the description trigger
+3. **Skills** — list each skill name with its description
 4. **Agents** — list each with its isolation mode (worktree, separate context)
 5. **Hooks** — list each with its lifecycle event (pre-commit, etc.)
 6. **MCP servers** — list each server added to `.mcp.json`
