@@ -125,7 +125,7 @@ Apply the following decision logic for each layer:
 | Commands | Generate based on the selection matrix in generation-guide.md. Universal commands (commit, review, explain) are always generated. Conditional commands only when the relevant stack is detected. |
 | Skills | Generate based on the selection matrix. Universal skills (code-conventions, project-context) are always generated. Conditional skills only when relevant. |
 | Agents | Generate **only** when ALL 3 conditions are true: (1) task benefits from a separate context window, (2) task modifies files that could conflict with main work, (3) project has tooling to validate the agent's output. |
-| Hooks | Generate **only** when ALL 3 conditions are true: (1) tool binary is confirmed installed (found in lockfile or config), (2) command runs in under 30 seconds, (3) hook includes a comment explaining how to disable it. |
+| Hooks | Generate **only** when ALL 3 conditions are true: (1) tool binary is confirmed installed on the current machine via an actual availability check (for example `command -v`); lockfile/config presence is supporting evidence only, (2) command runs in under 30 seconds, (3) hook includes a comment explaining how to disable it. |
 | `.mcp.json` | Generate only when popular frameworks are detected that benefit from MCP servers (e.g., Context7 for frontend/backend frameworks). |
 
 ### 2.3 Handle existing configuration
