@@ -183,7 +183,7 @@ For each generated hook:
 
 ### 3.4 Offer validation
 
-Ask if the user wants to validate the setup by running build or test commands to confirm everything works together.
+Offer build or test commands the user can run manually to validate the setup. Do not execute them from this command.
 
 ---
 
