@@ -67,9 +67,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 {{ end }}
 {{ end }}
 
-{{ if test_command }}
+{{ if test_command or e2e_framework }}
 ## Testing
 
+{{ if test_command }}
 ### Run All Tests
 ```sh
 {{ test_command }}
@@ -79,6 +80,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```sh
 {{ single_test_command }}
 ```
+{{ end }}
 
 {{ if e2e_framework }}
 ### E2E Tests
@@ -120,7 +122,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 {{ end }}
 {{ end }}
 
-{{ if naming_conventions or import_conventions or error_handling_pattern or architecture_pattern or file_organization }}
+{{ if naming_conventions or import_organization_description or error_handling_description or architecture_pattern_description or file_organization_description }}
 ## Code Conventions
 
 {{ if naming_conventions }}
@@ -130,36 +132,36 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 {{ end }}
 {{ end }}
 
-{{ if import_conventions }}
+{{ if import_organization_description }}
 ### Imports
 {{ import_organization_description }}
 {{ end }}
 
-{{ if error_handling_pattern }}
+{{ if error_handling_description }}
 ### Error Handling
 {{ error_handling_description }}
 {{ end }}
 
-{{ if architecture_pattern }}
+{{ if architecture_pattern_description }}
 ### Architecture
 {{ architecture_pattern_description }}
 {{ end }}
 
-{{ if file_organization }}
+{{ if file_organization_description }}
 ### File Organization
 {{ file_organization_description }}
 {{ end }}
 {{ end }}
 
-{{ if commit_format or branch_naming }}
+{{ if commit_format_description or branch_naming_description }}
 ## Git Conventions
 
-{{ if commit_format }}
+{{ if commit_format_description }}
 ### Commits
 {{ commit_format_description }}
 {{ end }}
 
-{{ if branch_naming }}
+{{ if branch_naming_description }}
 ### Branches
 {{ branch_naming_description }}
 {{ end }}
@@ -201,22 +203,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | `lint_command` | Section 8.7 linter detection → lint script or direct command | `npm run lint` |
 | `format_command` | Section 8.7 formatter detection → format script or direct command | `npx prettier --write .` |
 | `typecheck_command` | Section 8.7 or script detection → typecheck script | `npx tsc --noEmit` |
-| `naming_conventions` | Section 1.5 source file analysis; presence flag | `true` / `false` |
+| `naming_conventions` | Section 1.5 source file analysis; list of naming patterns found | list of `{scope, convention, example}` |
 | `scope` | Section 1.5 source file analysis → naming scope | `variables`, `types`, `files` |
 | `convention` | Section 1.5 source file analysis → naming pattern | `camelCase`, `PascalCase` |
 | `example` | Section 1.5 source file analysis → example identifier | `getUserById`, `UserService` |
-| `import_conventions` | Section 1.5 source file analysis; presence flag | `true` / `false` |
-| `import_organization_description` | Section 1.5 source file analysis → import pattern summary | `Grouped by external, then internal` |
-| `error_handling_pattern` | Section 1.5 source file analysis; presence flag | `true` / `false` |
-| `error_handling_description` | Section 1.5 source file analysis → error pattern summary | `Uses Result<T, E> for all fallible operations` |
-| `architecture_pattern` | Section 1.5 source file analysis; presence flag | `true` / `false` |
-| `architecture_pattern_description` | Section 1.5 source file analysis → architecture summary | `Repository pattern with service layer` |
-| `file_organization` | Section 1.5 source file analysis; presence flag | `true` / `false` |
-| `file_organization_description` | Section 1.5 source file analysis → file org summary | `Feature-based: each feature in its own directory` |
-| `commit_format` | Section 8.12 git convention detection; presence flag | `true` / `false` |
-| `commit_format_description` | Section 8.12 git convention detection → commit format summary | `Conventional commits, lowercase, imperative mood` |
-| `branch_naming` | Section 8.12 git convention detection; presence flag | `true` / `false` |
-| `branch_naming_description` | Section 8.12 git convention detection → branch pattern summary | `feature/*, fix/*, main` |
+| `import_organization_description` | Section 1.5 source file analysis → import pattern summary; omit if empty | `Grouped by external, then internal` |
+| `error_handling_description` | Section 1.5 source file analysis → error pattern summary; omit if empty | `Uses Result<T, E> for all fallible operations` |
+| `architecture_pattern_description` | Section 1.5 source file analysis → architecture summary; omit if empty | `Repository pattern with service layer` |
+| `file_organization_description` | Section 1.5 source file analysis → file org summary; omit if empty | `Feature-based: each feature in its own directory` |
+| `commit_format_description` | Section 8.12 git convention detection → commit format summary; omit if empty | `Conventional commits, lowercase, imperative mood` |
+| `branch_naming_description` | Section 8.12 git convention detection → branch pattern summary; omit if empty | `feature/*, fix/*, main` |
 | `database` | Section 8.9 database detection; presence flag | `true` / `false` |
 | `database_engine` | Section 8.9 database detection | `PostgreSQL` |
 | `orm_name` | Section 8.2 ORM framework detection | `Prisma`, `SQLAlchemy` |
@@ -229,10 +225,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | Project Overview | Always |
 | Workspace Structure | Monorepo detected (section 8.5) |
 | Build & Development | Build or dev script found (section 8.14) |
-| Testing | Test framework detected (section 8.6) |
-| Linting & Formatting | Linter or formatter detected (section 8.7) |
-| Code Conventions | Patterns found in source files (section 1.5) |
-| Git Conventions | Patterns found in git history (section 8.12) |
+| Testing | Test framework or E2E framework detected (section 8.6) |
+| Linting & Formatting | Linter, formatter, or typecheck command detected (section 8.7) |
+| Code Conventions | Any convention description populated from source files (section 1.5) |
+| Git Conventions | Commit format or branch naming description populated (section 8.12) |
 | Database | Database detected (section 8.9) |
 
 <!-- Sections 9.2–9.7 will be added in Stories 11–13 -->
