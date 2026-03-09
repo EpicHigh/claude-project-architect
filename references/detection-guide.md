@@ -278,7 +278,7 @@ To find how the project runs tests, check in order:
 
 | Path | Platform |
 |------|----------|
-| `.github/workflows/*.yml` | GitHub Actions |
+| `.github/workflows/*.yml` or `.github/workflows/*.yaml` | GitHub Actions |
 | `.gitlab-ci.yml` | GitLab CI |
 | `.circleci/config.yml` | CircleCI |
 | `Jenkinsfile` | Jenkins |
