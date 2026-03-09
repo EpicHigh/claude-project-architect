@@ -291,4 +291,150 @@ To find how the project runs tests, check in order:
 | `render.yaml` | Render |
 | `appveyor.yml` | AppVeyor |
 
-<!-- Sections 8.9–8.14 will be added in Story 9 -->
+---
+
+## 8.9 Database Detection
+
+### Via docker-compose services
+
+Check `docker-compose.yml`, `docker-compose.yaml`, or `compose.yml` for service images:
+
+| Image Pattern | Database |
+|---------------|----------|
+| `postgres`, `postgis` | PostgreSQL |
+| `mysql`, `mariadb` | MySQL / MariaDB |
+| `mongo` | MongoDB |
+| `redis` | Redis |
+| `memcached` | Memcached |
+| `elasticsearch`, `opensearch` | Elasticsearch / OpenSearch |
+| `mssql`, `mcr.microsoft.com/mssql` | SQL Server |
+| `cassandra` | Cassandra |
+| `dynamodb-local` | DynamoDB (local) |
+| `cockroachdb/cockroach` | CockroachDB |
+
+### Via dependencies
+
+| Dependency | Database |
+|-----------|----------|
+| `pg` (npm), `psycopg2` (Python), `github.com/lib/pq` (Go) | PostgreSQL |
+| `mysql2` (npm), `mysqlclient` (Python) | MySQL |
+| `mongodb` (npm), `pymongo` (Python) | MongoDB |
+| `redis` (npm), `redis-py` (Python), `github.com/redis/go-redis` (Go) | Redis |
+| `sqlite3` (npm), `better-sqlite3` (npm) | SQLite |
+
+---
+
+## 8.10 Cloud & IaC Detection
+
+### Cloud Providers
+
+| Indicator | Provider |
+|-----------|----------|
+| `aws-sdk` or `@aws-sdk/*` in dependencies, `.aws/` directory | AWS |
+| `@google-cloud/*` in dependencies, `gcloud` in CI | Google Cloud (GCP) |
+| `@azure/*` in dependencies, `.azure/` directory | Azure |
+| `doctl` in CI, `digitalocean` in configs | DigitalOcean |
+| `fly.toml` | Fly.io |
+| `railway.json` or `railway.toml` | Railway |
+| `supabase/` directory, `supabase` in dependencies | Supabase |
+
+### Infrastructure as Code (IaC)
+
+| Config File | Tool |
+|-------------|------|
+| `*.tf`, `terraform/` directory | Terraform |
+| `Pulumi.yaml`, `Pulumi.*.yaml` | Pulumi |
+| `cdk.json`, `lib/*.ts` with CDK imports | AWS CDK |
+| `template.yaml` or `template.json` (SAM/CloudFormation) | CloudFormation / SAM |
+| `ansible/`, `playbook.yml`, `*.ansible.yml` | Ansible |
+| `Chart.yaml`, `charts/` directory | Helm |
+| `serverless.yml` | Serverless Framework |
+
+---
+
+## 8.11 Container Detection
+
+| Indicator | Technology |
+|-----------|-----------|
+| `Dockerfile` | Docker |
+| `docker-compose.yml`, `docker-compose.yaml`, or `compose.yml` | Docker Compose |
+| `.dockerignore` | Docker (supporting file) |
+| `k8s/`, `kubernetes/`, `deploy/*.yaml` with `kind:` fields | Kubernetes |
+| `Chart.yaml`, `templates/` with K8s manifests | Helm |
+| `skaffold.yaml` | Skaffold |
+| `kustomization.yaml`, `kustomize/` | Kustomize |
+| `Tiltfile` | Tilt |
+
+---
+
+## 8.12 Git Convention Detection
+
+Extract conventions from git history. Run these commands and analyze the output:
+
+### Commit format
+
+Run `git log --oneline -20` and check:
+
+| Pattern | Convention |
+|---------|-----------|
+| Commits start with `feat:`, `fix:`, `chore:`, `docs:`, etc. | Conventional Commits |
+| Commits start with uppercase | Capitalized subjects |
+| Commits start with lowercase | Lowercase subjects |
+| Commits reference ticket numbers (e.g., `PROJ-123`) | Ticket-prefixed commits |
+
+### Branch naming
+
+Run `git branch -r` and check:
+
+| Pattern | Convention |
+|---------|-----------|
+| `feature/*`, `fix/*`, `hotfix/*` | GitFlow-style branches |
+| `feat/*`, `fix/*`, `chore/*` | Conventional branch prefixes |
+| `main` | Main branch (modern default) |
+| `master` | Master branch (legacy default) |
+| `develop` or `dev` | Development branch |
+
+---
+
+## 8.13 Existing Config Detection
+
+Check for existing AI tool configurations that must be preserved or referenced:
+
+| File / Directory | Tool |
+|-----------------|------|
+| `.claude/` directory | Claude Code (commands, skills, agents, settings) |
+| `CLAUDE.md` | Claude Code project config |
+| `.mcp.json` | MCP server configuration |
+| `.cursorrules` | Cursor AI rules |
+| `.cursor/rules/` | Cursor AI rules (directory format) |
+| `.github/copilot-instructions.md` | GitHub Copilot instructions |
+| `.aider*` | Aider configuration |
+| `.continue/` | Continue.dev configuration |
+
+If any Claude Code config exists, note all files — these will be **merged, never overwritten** during generation.
+
+If non-Claude AI configs exist (`.cursorrules`, copilot instructions), extract useful conventions from them to incorporate into the generated `.claude/` config.
+
+---
+
+## 8.14 Script Detection
+
+### package.json scripts
+
+Read `package.json` → `scripts` object. Common keys to look for:
+
+`dev`, `start`, `build`, `test`, `test:unit`, `test:e2e`, `lint`, `lint:fix`, `format`, `typecheck`, `clean`, `preview`, `deploy`, `db:migrate`, `db:seed`, `db:push`, `generate`, `codegen`
+
+### Makefile targets
+
+Read `Makefile` and extract target names (lines matching `^target-name:`). Common targets:
+
+`build`, `test`, `lint`, `run`, `dev`, `clean`, `install`, `deploy`, `docker-build`, `docker-run`, `migrate`, `generate`, `proto`
+
+### justfile recipes
+
+Read `justfile` and extract recipe names (lines matching `^recipe-name:`). Same common names as Makefile.
+
+### Taskfile tasks
+
+Read `Taskfile.yml` → `tasks` keys. Same common names as Makefile.
