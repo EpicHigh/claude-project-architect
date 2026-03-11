@@ -10,8 +10,6 @@
 
 ## Demo
 
-<!-- TODO: Replace with terminal recording -->
-
 ```
 > /project-architect
 
@@ -30,10 +28,10 @@ Generating configuration...
 
 ## Install
 
-```
-# Add the marketplace, then install the plugin
-/plugin marketplace add EpicHigh/claude-project-architect
-/plugin install project-architect@epichigh-claude-project-architect
+```sh
+# Clone and install locally
+git clone https://github.com/EpicHigh/claude-project-architect.git
+claude --plugin-dir ./claude-project-architect
 ```
 
 ## Usage
