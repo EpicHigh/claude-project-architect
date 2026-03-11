@@ -1,0 +1,66 @@
+name: Bug Report
+description: Report incorrect detection, wrong output, or unexpected behavior
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: Which part of the plugin is affected?
+      options:
+        - Detection
+        - Command output
+        - Skill output
+        - Agent output
+        - Hook
+        - CLAUDE.md
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the bug clearly. Include the actual output if possible.
+      placeholder: "When I ran /project-architect on my Next.js project, it generated..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should have happened instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: tech-stack
+    attributes:
+      label: Tech stack
+      description: What technologies does your project use?
+      placeholder: |
+        - Language: TypeScript
+        - Framework: Next.js 14
+        - ORM: Prisma
+        - Testing: Jest
+    validations:
+      required: true
+
+  - type: input
+    id: claude-code-version
+    attributes:
+      label: Claude Code version
+      description: Run `claude --version` and paste the output
+      placeholder: "1.0.0"
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Anything else that might help (config files, error messages, screenshots)
+    validations:
+      required: false

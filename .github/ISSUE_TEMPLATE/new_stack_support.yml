@@ -1,0 +1,68 @@
+name: New Stack Support
+description: Request detection and generation support for a new technology
+labels: ["new-stack"]
+body:
+  - type: input
+    id: stack-name
+    attributes:
+      label: Stack name
+      description: Name of the language, framework, or tool
+      placeholder: "Deno"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: stack-type
+    attributes:
+      label: Type
+      description: What kind of technology is this?
+      options:
+        - Language
+        - Frontend framework
+        - Backend framework
+        - Database / ORM
+        - Testing framework
+        - Build tool
+        - CI/CD platform
+        - Cloud provider
+        - IaC tool
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: indicator-files
+    attributes:
+      label: Indicator files
+      description: What files or config entries identify this stack? Be specific — exact filenames and dependency names.
+      placeholder: |
+        - `deno.json` or `deno.jsonc` in project root
+        - `deno.lock` lockfile
+        - Import maps in `deno.json`
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested-outputs
+    attributes:
+      label: Suggested commands / skills
+      description: What commands or skills should the plugin generate for this stack?
+      placeholder: |
+        - Commands: test (deno test), lint (deno lint), fmt (deno fmt)
+        - Skills: deno-patterns (module system, permissions)
+    validations:
+      required: false
+
+  - type: textarea
+    id: example-structure
+    attributes:
+      label: Example project structure
+      description: What does a typical project using this stack look like?
+      placeholder: |
+        ├── deno.json
+        ├── deno.lock
+        ├── main.ts
+        ├── deps.ts
+        └── tests/
+    validations:
+      required: false
