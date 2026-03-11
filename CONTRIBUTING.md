@@ -84,8 +84,11 @@ Install the plugin locally and run it against test fixtures:
 ```sh
 # Run Claude Code with the plugin loaded
 claude --plugin-dir .
+```
 
-# Then in Claude Code, navigate to a test fixture and run:
+Then inside Claude Code, navigate to a test fixture and run the command:
+
+```
 cd tests/fixtures/react-next-app
 /project-architect
 ```
