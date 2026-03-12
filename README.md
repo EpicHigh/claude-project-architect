@@ -28,8 +28,15 @@ Generating configuration...
 
 ## Install
 
+```
+# Add the marketplace and install
+/plugin marketplace add EpicHigh/claude-project-architect
+/plugin install project-architect@epichigh-claude-project-architect
+```
+
+Or install locally for development:
+
 ```sh
-# Clone and install locally
 git clone https://github.com/EpicHigh/claude-project-architect.git
 claude --plugin-dir ./claude-project-architect
 ```

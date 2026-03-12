@@ -22,9 +22,22 @@ jobs:
             console.log('plugin.json valid:', p.name, p.version);
           "
 
+      - name: Validate marketplace.json
+        run: |
+          node -e "
+            const m = require('./.claude-plugin/marketplace.json');
+            const p = require('./.claude-plugin/plugin.json');
+            if (!m.name) throw 'missing marketplace name';
+            if (!m.plugins || !m.plugins.length) throw 'missing plugins array';
+            const plug = m.plugins[0];
+            if (plug.version !== p.version) throw 'version mismatch: marketplace=' + plug.version + ' plugin=' + p.version;
+            console.log('marketplace.json valid:', m.name, 'plugin version:', plug.version);
+          "
+
       - name: Check file structure
         run: |
           test -f .claude-plugin/plugin.json
+          test -f .claude-plugin/marketplace.json
           test -f commands/project-architect.md
           test -f skills/project-scanner/SKILL.md
           test -f references/detection-guide.md
