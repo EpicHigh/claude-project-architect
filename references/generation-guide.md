@@ -1287,8 +1287,8 @@ Quick-reference table mapping Phase 1 detections to Phase 2 outputs. Use this as
 | Detected | Commands | Skills | Agents | Hooks | MCP |
 |----------|----------|--------|--------|-------|-----|
 | Any project | commit, review, explain | code-conventions, project-context | | | |
-| Frontend framework | component, page | design-system | | | Context7 |
-| Backend framework | endpoint | api-patterns | | | Context7 |
+| Frontend framework | component, page | design-system | | | Context7* |
+| Backend framework | endpoint | api-patterns | | | Context7* |
 | Database / ORM | migrate | schema-patterns | | | |
 | Test framework | test | test-patterns | test-writer | | |
 | E2E framework | e2e | | | | |
@@ -1305,3 +1305,4 @@ Quick-reference table mapping Phase 1 detections to Phase 2 outputs. Use this as
 - **Columns** are Phase 2 output layers. Each cell lists what to generate.
 - Empty cells mean nothing is generated for that combination.
 - "page" command requires an app router framework specifically (Next.js, Nuxt, SvelteKit, Remix), not just any frontend framework.
+- *Context7 is only generated for frameworks listed in section 9.6 (React, Next.js, Vue, Nuxt, Svelte, SvelteKit, Angular, Express, Fastify, NestJS, Django, FastAPI, Flask, Tailwind, Prisma, Drizzle). Not all backend/frontend frameworks have Context7 documentation support.

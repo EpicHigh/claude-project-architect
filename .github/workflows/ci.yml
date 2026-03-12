@@ -56,6 +56,9 @@ jobs:
           head -10 skills/project-scanner/SKILL.md | grep -q "^description:"
           echo "Skill frontmatter valid"
 
+      - name: Validate structure end-to-end
+        run: bash tests/validate-structure.sh
+
       - name: Lint markdown
         uses: DavidAnson/markdownlint-cli2-action@v18
         with:
