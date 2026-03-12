@@ -1,0 +1,26 @@
+{
+  "name": "epichigh-claude-project-architect",
+  "description": "Self-hosted marketplace for the project-architect Claude Code plugin",
+  "owner": {
+    "name": "EpicHigh",
+    "url": "https://github.com/EpicHigh"
+  },
+  "plugins": [
+    {
+      "name": "project-architect",
+      "description": "Analyze any codebase and generate Claude Code configuration — CLAUDE.md, commands, skills, agents, hooks — tailored to your project.",
+      "version": "0.1.0",
+      "source": ".",
+      "category": "development",
+      "tags": [
+        "project-setup",
+        "code-analysis",
+        "commands",
+        "skills",
+        "agents",
+        "hooks",
+        "configuration"
+      ]
+    }
+  ]
+}
