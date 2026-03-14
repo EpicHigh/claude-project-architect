@@ -1403,5 +1403,7 @@ External tools are now available to Claude through MCP:
 - Edit `CLAUDE.md` to update project conventions or add new rules
 - Add commands in `.claude/commands/` — any markdown file becomes a slash command
 - Add skills in `.claude/skills/` — create a directory with a `SKILL.md` file
+{{ if hooks_generated }}
 - Review hooks in `.claude/settings.json` — remove any you don't want
+{{ end }}
 `````
