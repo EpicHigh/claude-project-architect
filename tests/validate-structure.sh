@@ -69,6 +69,7 @@ echo "=== Example Outputs ==="
 echo ""
 echo "--- react-nextjs ---"
 check_file examples/react-nextjs/CLAUDE.md
+check_file examples/react-nextjs/INSTRUCTION.md
 check_file examples/react-nextjs/.mcp.json
 check_file examples/react-nextjs/.claude/settings.json
 for cmd in commit review explain component page migrate test; do
@@ -132,6 +133,19 @@ check_file ARCHITECTURE.md
 check_file LICENSE
 check_file CODE_OF_CONDUCT.md
 check_file CHANGELOG.md
+
+echo ""
+echo "=== INSTRUCTION.md Checks ==="
+if [ -f examples/react-nextjs/INSTRUCTION.md ]; then
+  INSTRUCTION_LINES=$(wc -l < examples/react-nextjs/INSTRUCTION.md | tr -d ' ')
+  if [ "$INSTRUCTION_LINES" -lt 150 ]; then
+    pass "INSTRUCTION.md is under 150 lines ($INSTRUCTION_LINES lines)"
+  else
+    fail "INSTRUCTION.md exceeds 150 lines ($INSTRUCTION_LINES lines)"
+  fi
+else
+  fail "examples/react-nextjs/INSTRUCTION.md missing (cannot run line-count check)"
+fi
 
 echo ""
 echo "=== Results ==="
