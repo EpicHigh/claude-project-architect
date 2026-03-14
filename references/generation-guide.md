@@ -1329,7 +1329,7 @@ After Phase 2 generates all `.claude/` configuration, produce an `INSTRUCTION.md
 
 # Getting Started with Your Claude Code Setup
 
-{{ summary_paragraph — one paragraph summarizing what was detected and generated, e.g. "project-architect scanned your Next.js 14 project and set up 7 commands, 5 skills, 1 agent, and hooks tailored to your React + Prisma + Jest stack." }}
+{{ summary_paragraph }}
 
 {{ if commands_generated }}
 
@@ -1339,9 +1339,9 @@ After Phase 2 generates all `.claude/` configuration, produce an `INSTRUCTION.md
 |---------|-------------|--------|
 {{ for each generated command }}
 | `/{{ command_name }}` | {{ one_line_description }} | `{{ example_usage }}` |
-{{ end for }}
+{{ end }}
 
-{{ end if }}
+{{ end }}
 
 {{ if skills_generated }}
 
@@ -1351,9 +1351,9 @@ Skills activate automatically when Claude detects relevant context. You don't ne
 
 {{ for each generated skill }}
 - **{{ skill_name }}** — {{ description }}. Try: "{{ natural_language_trigger }}"
-{{ end for }}
+{{ end }}
 
-{{ end if }}
+{{ end }}
 
 {{ if agents_generated }}
 
@@ -1363,9 +1363,9 @@ Agents run in separate context windows for tasks that benefit from isolation.
 
 {{ for each generated agent }}
 - **{{ agent_name }}** — {{ what_it_does }}. Invoke with: `{{ invocation_example }}`
-{{ end for }}
+{{ end }}
 
-{{ end if }}
+{{ end }}
 
 {{ if hooks_generated }}
 
@@ -1376,9 +1376,9 @@ Hooks run automatically at specific lifecycle events. Each can be disabled indiv
 {{ for each generated hook }}
 - **{{ hook_event }}** — {{ what_it_does }}
   - To disable: remove the corresponding entry from `.claude/settings.json`
-{{ end for }}
+{{ end }}
 
-{{ end if }}
+{{ end }}
 
 {{ if mcp_generated }}
 
@@ -1388,16 +1388,15 @@ External tools are now available to Claude through MCP:
 
 {{ for each mcp_server }}
 - **{{ server_name }}** — {{ what_it_provides }}
-{{ end for }}
+{{ end }}
 
-{{ end if }}
+{{ end }}
 
 ## Tips for Getting the Most Out of It
 
-{{ 3-5 practical tips specific to the developer's stack, e.g.: }}
-{{ - "Try asking Claude to scaffold a new Next.js page — it knows your app router structure" }}
-{{ - "Use /commit after changes to get conventional commits that match your project's style" }}
-{{ - "Ask 'what's the test pattern here?' in any file to get the testing skill activated" }}
+{{ for each stack_specific_tip }}
+- {{ stack_specific_tip }}
+{{ end }}
 
 ## Customizing Your Setup
 

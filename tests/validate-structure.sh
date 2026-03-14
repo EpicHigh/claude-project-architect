@@ -136,11 +136,15 @@ check_file CHANGELOG.md
 
 echo ""
 echo "=== INSTRUCTION.md Checks ==="
-INSTRUCTION_LINES=$(wc -l < examples/react-nextjs/INSTRUCTION.md | tr -d ' ')
-if [ "$INSTRUCTION_LINES" -lt 150 ]; then
-  pass "INSTRUCTION.md is under 150 lines ($INSTRUCTION_LINES lines)"
+if [ -f examples/react-nextjs/INSTRUCTION.md ]; then
+  INSTRUCTION_LINES=$(wc -l < examples/react-nextjs/INSTRUCTION.md | tr -d ' ')
+  if [ "$INSTRUCTION_LINES" -lt 150 ]; then
+    pass "INSTRUCTION.md is under 150 lines ($INSTRUCTION_LINES lines)"
+  else
+    fail "INSTRUCTION.md exceeds 150 lines ($INSTRUCTION_LINES lines)"
+  fi
 else
-  fail "INSTRUCTION.md exceeds 150 lines ($INSTRUCTION_LINES lines)"
+  fail "examples/react-nextjs/INSTRUCTION.md missing (cannot run line-count check)"
 fi
 
 echo ""

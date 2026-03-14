@@ -181,7 +181,7 @@ Organize the output as follows:
 4. **Agents** — list each with its isolation mode (worktree, separate context)
 5. **Hooks** — list each with its lifecycle event (pre-commit, etc.)
 6. **MCP servers** — list each server added to `.mcp.json`
-7. **INSTRUCTION.md** — mention the onboarding guide was generated and where to find it
+7. **INSTRUCTION.md** — if generated, mention where to find it; if already present, mention it was preserved
 
 ### 3.2 Explain why each was generated
 
