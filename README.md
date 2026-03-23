@@ -19,9 +19,9 @@ Scanning project...
 
 Generating configuration...
 ✓ CLAUDE.md — project overview, build/test/lint commands
-✓ 4 commands — commit, implement, fix, review
+✓ 6 commands — commit, implement, fix, review, optimize-db, security-audit
 ✓ 6 skills — implement-feature, fix-bug, improve-architecture, tdd, design-system, schema-patterns
-✓ 5 agents — implementer, architect, reviewer, qa, fixer
+✓ 6 agents — architect, reviewer, developer (React/Next.js), db-specialist (Prisma/PostgreSQL), qa (Jest), fixer
 ✓ 1 hook — lint + test pre-commit
 ✓ 1 MCP server — Context7 for Next.js docs
 ```
@@ -62,15 +62,20 @@ The plugin runs in 4 phases:
 | --- | --- | --- |
 | CLAUDE.md | Project overview, build/test/lint commands, conventions | Always |
 | Commands | `commit`, `implement`, `fix`, `review` | Always |
+| Commands | `optimize-db` | Database/ORM detected |
+| Commands | `security-audit` | Backend framework detected |
 | Skills | `implement-feature`, `fix-bug`, `improve-architecture` | Always |
 | Skills | `tdd` | Test framework detected |
 | Skills | `design-system` | Styling framework detected |
 | Skills | `api-patterns` | Backend framework detected |
 | Skills | `schema-patterns` | Database/ORM detected |
-| Agents | `architect` | Always |
-| Agents | `reviewer` | Linter or test framework detected |
-| Agents | `implementer` | Test framework + linter detected |
-| Agents | `qa`, `fixer` | Test framework detected |
+| Agents | `architect` (stack-aware) | Always |
+| Agents | `reviewer` (stack-specific checklists + security) | Linter or test framework detected |
+| Agents | `developer` (framework-specific patterns) | Test framework + linter detected |
+| Agents | `db-specialist` (ORM + engine expertise) | Database/ORM detected |
+| Agents | `devops` (Docker + CI/CD optimization) | Docker or CI/CD detected |
+| Agents | `qa` (test framework patterns) | Test framework detected |
+| Agents | `fixer` (language-specific debugging) | Test framework detected |
 | Hooks | lint pre-commit | Linter detected |
 | Hooks | lint + test pre-commit | Linter + fast tests detected |
 | MCP | Context7 docs server | Framework with docs detected |
@@ -135,9 +140,9 @@ references/generation-guide.md     → Templates for generated output
 
 See complete generated output for different stacks:
 
-- **[React + Next.js](examples/react-nextjs/)** — 4 commands, 6 skills, 5 agents, hooks, MCP
-- **[Go API Server](examples/go-api/)** — 4 commands, 6 skills, 5 agents, hooks
-- **[Python + FastAPI](examples/python-fastapi/)** — 4 commands, 6 skills, 5 agents, hooks, MCP
+- **[React + Next.js](examples/react-nextjs/)** — 6 commands, 6 skills, 6 agents (React/Prisma/Jest-specific), hooks, MCP
+- **[Go API Server](examples/go-api/)** — 6 commands, 6 skills, 7 agents (Go/Ent/Docker-specific), hooks
+- **[Python + FastAPI](examples/python-fastapi/)** — 6 commands, 6 skills, 6 agents (FastAPI/SQLAlchemy/pytest-specific), hooks, MCP
 
 ## Customization
 
