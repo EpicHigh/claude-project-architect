@@ -2,35 +2,37 @@
 
 # Getting Started with Your Claude Code Setup
 
-project-architect scanned your Next.js 14 project and set up 7 commands, 5 skills, 1 agent, and hooks tailored to your React + Prisma + Jest + Tailwind stack. Everything is ready to use — just start working and Claude will adapt to your project's patterns.
+project-architect scanned your Next.js 14 project and set up 4 commands, 6 skills, 5 agents, and hooks tailored to your React + Prisma + Jest + Tailwind stack. Everything is ready to use — just start working and Claude will adapt to your project's patterns.
 
 ## Your Commands
 
 | Command | What it does | Try it |
 |---------|-------------|--------|
 | `/commit` | Create a conventional commit with the right scope and type | `Type /commit after staging changes` |
-| `/review` | Review code changes for bugs, style, and best practices | `/review` on any branch with changes |
-| `/explain` | Explain how a piece of code works in context | `/explain` while viewing a file |
-| `/component` | Scaffold a new React component with tests and styles | `/component UserCard` |
-| `/page` | Scaffold a new Next.js app router page | `/page dashboard/settings` |
-| `/migrate` | Create a new Prisma migration from schema changes | `/migrate add-user-roles` |
-| `/test` | Run tests or generate test files for existing code | `/test src/components/UserCard.tsx` |
+| `/implement` | Implement a feature with structured exploration, planning, and validation | `/implement add user profile page` |
+| `/fix` | Diagnose and fix a bug with root cause analysis and regression testing | `/fix cart total doesn't update` |
+| `/review` | Review code changes with severity-tagged findings and actionable fixes | `/review` on any branch with changes |
 
 ## Your Skills
 
 Skills activate automatically when Claude detects relevant context. You don't need to invoke them — just ask naturally.
 
-- **code-conventions** — Knows your TypeScript naming, import ordering, and error handling patterns. Try: "Is this following our code style?"
-- **project-context** — Understands your Next.js app structure, key directories, and available scripts. Try: "Where should I put this new feature?"
+- **implement-feature** — Structured feature implementation methodology. Ensures codebase exploration before writing code. Try: "Implement a new dashboard page"
+- **fix-bug** — Bug triage and fix methodology. Ensures root cause analysis before applying fixes. Try: "Fix the login redirect loop"
+- **improve-architecture** — Architecture improvement methodology for reducing complexity and technical debt. Try: "How should we restructure the API layer?"
+- **tdd** — Test-Driven Development with red-green-refactor cycle. Try: "Let's TDD the payment service"
 - **design-system** — Knows your Tailwind config, component patterns, and styling approach. Try: "What's our button style?"
 - **schema-patterns** — Understands your Prisma schema, relations, and migration workflow. Try: "How do we handle database relations?"
-- **test-patterns** — Knows your Jest setup, testing conventions, and coverage expectations. Try: "What's the test pattern here?"
 
 ## Your Agents
 
 Agents run in separate context windows for tasks that benefit from isolation.
 
-- **test-writer** — Generates comprehensive test suites for components and utilities. Invoke with: `Use the test-writer agent to add tests for UserCard`
+- **implementer** — Implements features in an isolated worktree with validation at each step. Invoke with: `Use the implementer agent to add the checkout flow`
+- **architect** — Analyzes codebase architecture and designs solutions with trade-off evaluation. Invoke with: `Use the architect agent to evaluate our API structure`
+- **reviewer** — Reviews code changes with severity-tagged findings and educational feedback. Invoke with: `Use the reviewer agent to review this branch`
+- **qa** — Runs comprehensive quality checks and identifies test gaps with evidence. Invoke with: `Use the qa agent to check test coverage`
+- **fixer** — Fixes bugs in an isolated worktree with root cause analysis and regression testing. Invoke with: `Use the fixer agent to fix the cart calculation bug`
 
 ## Your Hooks
 
@@ -47,11 +49,12 @@ External tools are now available to Claude through MCP:
 
 ## Tips for Getting the Most Out of It
 
-- Try asking Claude to scaffold a new Next.js page — it knows your app router structure and will create the right file in `app/`
-- Use `/commit` after changes to get conventional commits that match your project's existing style
-- Ask "what's the test pattern here?" in any file to get the testing skill activated with your Jest conventions
-- When working with Prisma, ask Claude to explain your schema relations — it understands your data model
-- Use the test-writer agent for generating comprehensive test suites without cluttering your main conversation
+- Use `/implement` for new features — it ensures codebase exploration before writing code
+- Use `/fix` for bugs — it enforces root cause analysis and regression testing
+- Use `/commit` after changes to get conventional commits that match your project's style
+- Ask "how should we restructure this?" to activate the improve-architecture skill
+- Use the implementer agent for features that benefit from isolated worktree development
+- Use the qa agent to find test gaps before merging
 
 ## Customizing Your Setup
 
