@@ -21,7 +21,7 @@ Generating configuration...
 ✓ CLAUDE.md — project overview, build/test/lint commands
 ✓ 6 commands — commit, implement, fix, review, optimize-db, security-audit
 ✓ 6 skills — implement-feature, fix-bug, improve-architecture, tdd, design-system, schema-patterns
-✓ 6 agents — architect, reviewer, developer (React/Next.js), db-specialist (Prisma/PostgreSQL), qa (Jest), fixer
+✓ 7 agents — architect, reviewer, developer (React/Next.js), db-specialist (Prisma/PostgreSQL), devops (GitHub Actions), qa (Jest), fixer
 ✓ 1 hook — lint + test pre-commit
 ✓ 1 MCP server — Context7 for Next.js docs
 ```

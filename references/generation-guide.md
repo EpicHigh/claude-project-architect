@@ -1016,6 +1016,23 @@ You are a software architect analyzing {{ project_name }}.
 {{ if backend_framework == "FastAPI" or backend_framework == "Django" or backend_framework == "Flask" }}
 - {{ if backend_framework == "FastAPI" }}Dependency injection hierarchy, Pydantic model layering.{{ end }}
 - {{ if backend_framework == "Django" }}App boundary design, manager/queryset patterns, signal vs explicit calls.{{ end }}
+- {{ if backend_framework == "Flask" }}Blueprint organization, application factory pattern, extension integration.{{ end }}
+{{ end }}
+{{ if backend_framework == "Rails" }}
+- Convention over configuration: where Rails makes decisions for you vs where to customize.
+- ActiveRecord model boundaries, service object extraction criteria.
+{{ end }}
+{{ if backend_framework == "Spring Boot" }}
+- Layered architecture: Controller → Service → Repository. Bean lifecycle and scope.
+- Configuration property binding and profile management.
+{{ end }}
+{{ if backend_framework == "Phoenix" }}
+- Context boundaries (bounded contexts as Phoenix contexts).
+- LiveView vs traditional controller trade-offs.
+{{ end }}
+{{ if backend_framework == "Actix Web" }}
+- Actor model: when to use actors vs shared state.
+- Extractor patterns for request data.
 {{ end }}
 {{ end }}
 
@@ -1124,6 +1141,23 @@ You are a code reviewer for {{ project_name }}.
 - Type hint completeness. No bare except clauses.
 - {{ if backend_framework == "FastAPI" }}Pydantic model validation, dependency injection correctness.{{ end }}
 - {{ if backend_framework == "Django" }}N+1 queries (select_related/prefetch_related), raw SQL injection.{{ end }}
+{{ end }}
+{{ if language == "Ruby" }}
+- N+1 queries (use includes/eager_load). No SQL injection via string interpolation.
+- Strong params enforcement. Mass assignment protection.
+{{ end }}
+{{ if language == "Java" or language == "Kotlin" }}
+- Null safety: proper Optional usage, no raw null returns from public APIs.
+- Resource cleanup: try-with-resources, connection pool management.
+- Thread safety: synchronized access, immutable DTOs.
+{{ end }}
+{{ if language == "Elixir" }}
+- Pattern match completeness. Process supervision tree design.
+- Ecto changeset validation. No unbounded queries.
+{{ end }}
+{{ if language == "Rust" }}
+- Ownership and borrowing correctness. No unnecessary `.clone()`.
+- Error handling: `?` operator, proper error type hierarchy.
 {{ end }}
 {{ end }}
 
