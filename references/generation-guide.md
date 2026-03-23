@@ -237,7 +237,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 9.2 Command Templates
 
-Each command is generated as a `.md` file in `.claude/commands/`. Templates include YAML frontmatter (description, allowed-tools) and a body with `{{ variable }}` placeholders.
+Each command is generated as a `.md` file in `.claude/commands/`. Commands are workflow entry points — they orchestrate real work with codebase exploration, incremental validation, and concrete phases.
+
+**Design principles for commands:**
+- Commands orchestrate workflows, they don't list checklists
+- Every command starts with understanding context before taking action
+- Validation happens after each step, not just at the end
+- Commands use the project's actual tools (detected in Phase 1)
 
 ### Universal Commands (always generate)
 
@@ -271,512 +277,177 @@ Run `{{ lint_command }}` before committing. If it fails, show errors and ask to 
 {{ end }}
 `````
 
+#### implement.md
+
+**Trigger:** Always generate.
+
+`````markdown
+---
+description: Implement a feature with structured exploration, planning, and validation
+allowed-tools: Bash, Read, Write, Glob, Grep, Agent
+---
+
+# Implement Feature
+
+## Phase 1: Understand
+
+1. Read the user's description carefully. Ask clarifying questions if the scope is ambiguous.
+2. Define what success looks like — what should work when you're done?
+
+## Phase 2: Explore
+
+3. Search the codebase for related code:
+   - Grep for domain terms, similar features, shared utilities.
+   - Read existing implementations of the closest analog.
+   - Identify the patterns the project already uses (file structure, naming, error handling).
+4. Map the change surface: which files need to be created or modified?
+
+## Phase 3: Plan
+
+5. Write a short plan (3-7 steps) listing the changes in dependency order.
+6. Show the plan to the user and wait for approval before writing any code.
+
+## Phase 4: Implement
+
+7. Make changes incrementally — one logical step at a time.
+8. After each step, validate immediately:
+{{ if lint_command }}
+   - Run `{{ lint_command }}` — fix lint issues before moving on.
+{{ end }}
+{{ if typecheck_command }}
+   - Run `{{ typecheck_command }}` — fix type errors before moving on.
+{{ end }}
+{{ if test_command }}
+   - Run `{{ test_command }}` — ensure nothing is broken.
+{{ end }}
+{{ if test_command }}
+9. Write tests for new behavior before considering the feature complete.
+{{ end }}
+
+## Phase 5: Validate
+
+{{ if test_command }}
+10. Full test suite: `{{ test_command }}`
+{{ end }}
+{{ if lint_command }}
+11. Linter: `{{ lint_command }}`
+{{ end }}
+{{ if build_command }}
+12. Build: `{{ build_command }}`
+{{ end }}
+13. Summarize what was changed, why, and any follow-up work needed.
+`````
+
+#### fix.md
+
+**Trigger:** Always generate.
+
+`````markdown
+---
+description: Diagnose and fix a bug with root cause analysis and regression testing
+allowed-tools: Bash, Read, Write, Glob, Grep
+---
+
+# Fix Bug
+
+## Phase 1: Reproduce
+
+1. Understand the reported behavior — what happens vs. what should happen.
+2. Find the relevant code path using Grep and Read.
+{{ if test_command }}
+3. Write a failing test that demonstrates the bug — this proves the bug exists.
+{{ end }}
+
+## Phase 2: Diagnose
+
+4. Trace the code path from input to incorrect output.
+5. Identify the **root cause** — not just the symptom.
+6. Explain the root cause to the user before proceeding with the fix.
+
+## Phase 3: Fix
+
+7. Apply the **minimal change** that fixes the root cause.
+8. Do not refactor surrounding code — fix only the bug, nothing else.
+
+## Phase 4: Verify
+
+{{ if test_command }}
+9. Run the failing test — it should now pass: `{{ single_test_command }}`
+10. Run the full test suite — nothing else broke: `{{ test_command }}`
+{{ end }}
+{{ if lint_command }}
+11. Linter passes: `{{ lint_command }}`
+{{ end }}
+12. Summarize: root cause, what was changed, and how to prevent recurrence.
+`````
+
 #### review.md
 
 **Trigger:** Always generate.
 
 `````markdown
 ---
-description: Review code changes for bugs, style, and improvements
+description: Review code changes with severity-tagged findings and actionable fixes
 allowed-tools: Bash, Read, Grep, Glob
 ---
 
 # Code Review
 
-## What to Review
+## Process
 
 1. Run `git diff {{ default_branch }}` to see all changes on this branch.
-2. For each changed file, check:
-   - Correctness: logic errors, edge cases, null/undefined handling
-   - Security: injection, XSS, secrets, OWASP top 10
+2. For each changed file, analyze:
+   - **Correctness:** logic errors, edge cases, null/undefined handling, race conditions
+   - **Security:** injection, XSS, secrets in code, auth bypass (OWASP top 10)
+   - **Performance:** N+1 queries, unnecessary allocations, missing indexes, unbounded loops
 {{ if naming_conventions }}
-   - Naming: follows project conventions ({{ for each naming_convention }}{{ scope }}: {{ convention }}{{ end }})
+   - **Conventions:** {{ for each naming_convention }}{{ scope }}: {{ convention }}; {{ end }}
 {{ end }}
 {{ if test_command }}
-   - Test coverage: new code has tests, existing tests still pass
+3. Run `{{ test_command }}` — report any failures.
 {{ end }}
-   - Readability: clear intent, no unnecessary complexity
+{{ if lint_command }}
+4. Run `{{ lint_command }}` — report any violations.
+{{ end }}
 
 ## Output Format
 
-For each finding:
-- **File:line** — severity (bug/warning/nit) — description — suggested fix
-`````
+Tag each finding with severity:
 
-#### explain.md
+- **blocker** — must fix before merge (bugs, security issues, data loss risk)
+- **suggestion** — should fix, improves quality (performance, readability, maintainability)
+- **nit** — optional, minor style preference
 
-**Trigger:** Always generate.
+Format: `**file:line** — severity — description — suggested fix`
 
-`````markdown
----
-description: Explain code, architecture, or project decisions
-allowed-tools: Read, Grep, Glob
----
-
-# Explain Code
-
-Explain the requested code, file, or architectural concept.
-
-## Guidelines
-
-- Start with a one-sentence summary of what it does.
-- Explain the "why" before the "how."
-{{ if architecture_pattern_description }}
-- Reference the project's architecture: {{ architecture_pattern_description }}
-{{ end }}
-{{ if primary_framework }}
-- Use {{ primary_framework }} terminology where appropriate.
-{{ end }}
-- For files: explain purpose, key functions, and how it connects to the rest of the codebase.
-- For functions: explain parameters, return value, side effects, and callers.
-- Keep explanations concise — prefer examples over abstract descriptions.
-`````
-
-### Conditional Commands
-
-#### component.md
-
-**Trigger:** Frontend framework detected (section 8.2 — React, Vue, Svelte, Angular, Solid).
-
-`````markdown
----
-description: Generate a new {{ frontend_framework }} component
-allowed-tools: Read, Write, Glob, Grep
----
-
-# New Component
-
-## Arguments
-
-- **name** (required): Component name in PascalCase
-
-## Steps
-
-1. Determine the component directory:
-{{ if component_directory }}
-   - Place in `{{ component_directory }}/`
-{{ else }}
-   - Find the existing component directory pattern using `Glob`.
-{{ end }}
-2. Create the component file:
-{{ if frontend_framework == "React" }}
-   - `{{ component_extension }}` file with a functional component
-   - {{ if typescript }}Include TypeScript props interface{{ end }}
-{{ end }}
-{{ if frontend_framework == "Vue" }}
-   - `.vue` file with `<script setup>`, `<template>`, and `<style>` blocks
-{{ end }}
-{{ if frontend_framework == "Svelte" }}
-   - `.svelte` file with `<script>`, markup, and `<style>` blocks
-{{ end }}
-{{ if frontend_framework == "Angular" }}
-   - `.component.ts`, `.component.html`, and `.component.css` files
-{{ end }}
-{{ if styling_framework }}
-3. Apply {{ styling_framework }} classes for styling.
-{{ end }}
-{{ if test_command }}
-4. Create a test file next to the component.
-{{ end }}
-`````
-
-#### page.md
-
-**Trigger:** App router framework detected (section 8.2 — Next.js, Nuxt, SvelteKit, Remix).
-
-`````markdown
----
-description: Create a new {{ app_router_framework }} page/route
-allowed-tools: Read, Write, Glob, Grep
----
-
-# New Page
-
-## Arguments
-
-- **route** (required): URL path (e.g., `/dashboard/settings`)
-
-## Steps
-
-1. Convert route to file path:
-{{ if app_router_framework == "Next.js" }}
-   - Create `{{ pages_directory }}/{{ route_segments }}/page.{{ extension }}`
-{{ end }}
-{{ if app_router_framework == "Nuxt" }}
-   - Create `pages/{{ route_segments }}.vue`
-{{ end }}
-{{ if app_router_framework == "SvelteKit" }}
-   - Create `src/routes/{{ route_segments }}/+page.svelte`
-{{ end }}
-{{ if app_router_framework == "Remix" }}
-   - Create `app/routes/{{ route_file }}.{{ extension }}`
-{{ end }}
-2. Add the page component with:
-   - Default export
-   - Basic layout structure
-{{ if styling_framework }}
-   - {{ styling_framework }} classes
-{{ end }}
-{{ if test_command }}
-3. Create a test file for the page.
-{{ end }}
-`````
-
-#### endpoint.md
-
-**Trigger:** Backend framework detected (section 8.2).
-
-`````markdown
----
-description: Create a new {{ backend_framework }} API endpoint
-allowed-tools: Read, Write, Glob, Grep
----
-
-# New Endpoint
-
-## Arguments
-
-- **method** (required): HTTP method (GET, POST, PUT, DELETE, PATCH)
-- **path** (required): URL path (e.g., `/api/users/:id`)
-
-## Steps
-
-1. Determine the appropriate file:
-{{ if api_directory }}
-   - Look in `{{ api_directory }}/` for existing routes.
-{{ else }}
-   - Find the route registration pattern using `Grep`.
-{{ end }}
-2. Create the endpoint following {{ backend_framework }} conventions:
-   - Find an existing endpoint in the codebase and use it as a reference.
-{{ if backend_framework == "Express" or backend_framework == "Fastify" }}
-   - Add route handler with request/response typing.
-{{ end }}
-{{ if backend_framework == "NestJS" }}
-   - Add controller method with decorator (`@Get`, `@Post`, etc.).
-{{ end }}
-{{ if backend_framework == "Django" or backend_framework == "FastAPI" or backend_framework == "Flask" }}
-   - Add view/route function with appropriate decorator.
-{{ end }}
-{{ if backend_framework == "Gin" or backend_framework == "Echo" or backend_framework == "Fiber" }}
-   - Add handler function and register route.
-{{ end }}
-3. Include:
-   - Input validation
-   - Error handling following project patterns
-{{ if orm_name }}
-   - {{ orm_name }} query for data access
-{{ end }}
-{{ if test_command }}
-4. Create a test for the endpoint.
-{{ end }}
-`````
-
-#### migrate.md
-
-**Trigger:** Database/ORM detected (section 8.9 + section 8.2 ORM).
-
-`````markdown
----
-description: Create and run a database migration
-allowed-tools: Bash, Read, Write, Glob
----
-
-# Database Migration
-
-## Arguments
-
-- **name** (required): Migration name (e.g., `add_users_table`, `add_email_to_posts`)
-
-## Steps
-
-1. Create the migration:
-{{ if orm_name == "Prisma" }}
-   - Edit `prisma/schema.prisma` with the schema change.
-   - Run `npx prisma migrate dev --name {{ name }}`.
-{{ end }}
-{{ if orm_name == "Drizzle" }}
-   - Add/modify schema in the drizzle schema directory.
-   - Run `npx drizzle-kit generate` then `npx drizzle-kit migrate`.
-{{ end }}
-{{ if orm_name == "TypeORM" }}
-   - Run `npx typeorm migration:generate -n {{ name }}`.
-{{ end }}
-{{ if orm_name == "SQLAlchemy" }}
-   - Run `alembic revision --autogenerate -m "{{ name }}"`.
-{{ end }}
-{{ if orm_name == "Django ORM" }}
-   - Update the model in the appropriate `models.py`.
-   - Run `python manage.py makemigrations` then `python manage.py migrate`.
-{{ end }}
-{{ if orm_name == "Ent" }}
-   - Run `go generate ./ent` after modifying the schema.
-{{ end }}
-{{ if orm_name == "GORM" }}
-   - Update the model struct and run `AutoMigrate`.
-{{ end }}
-2. Review the generated migration file.
-3. Run the migration against the dev database.
-{{ if test_command }}
-4. Run tests to verify nothing broke.
-{{ end }}
-`````
-
-#### test.md
-
-**Trigger:** Test framework detected (section 8.6).
-
-`````markdown
----
-description: Create or run tests for a file or feature
-allowed-tools: Bash, Read, Write, Glob, Grep
----
-
-# Testing
-
-## Modes
-
-### Run tests for a file
-```sh
-{{ single_test_command }}
-```
-
-### Create a new test
-
-1. For the target file, create a test file:
-{{ if test_file_pattern }}
-   - Follow pattern: `{{ test_file_pattern }}`
-{{ else }}
-   - Find existing test files with `Glob` and follow the same pattern.
-{{ end }}
-2. Write tests covering:
-   - Happy path
-   - Edge cases (empty input, null, boundary values)
-   - Error cases
-3. Run the test: `{{ single_test_command }}`
-
-{{ if coverage_command }}
-### Check coverage
-```sh
-{{ coverage_command }}
-```
-{{ end }}
-`````
-
-#### e2e.md
-
-**Trigger:** E2E framework detected (section 8.6 — Playwright, Cypress, Selenium).
-
-`````markdown
----
-description: Create or run end-to-end tests
-allowed-tools: Bash, Read, Write, Glob, Grep
----
-
-# E2E Testing
-
-## Run all E2E tests
-```sh
-{{ e2e_command }}
-```
-
-## Create a new E2E test
-
-1. Create a test file in `{{ e2e_directory }}/`.
-{{ if e2e_framework == "Playwright" }}
-2. Use Playwright's `test` and `expect` API.
-3. Use `page.goto()`, `page.click()`, `page.fill()` for interactions.
-{{ end }}
-{{ if e2e_framework == "Cypress" }}
-2. Use Cypress's `cy.visit()`, `cy.get()`, `cy.click()` API.
-3. Place in `cypress/e2e/` directory.
-{{ end }}
-4. Test the critical user flow end-to-end.
-5. Run: `{{ e2e_command }}`
-`````
-
-#### docker.md
-
-**Trigger:** Docker detected (section 8.11 — Dockerfile or docker-compose present).
-
-`````markdown
----
-description: Build, run, or manage Docker containers
-allowed-tools: Bash, Read, Write, Glob
----
-
-# Docker
-
-## Common Tasks
-
-{{ if has_dockerfile }}
-### Build
-```sh
-docker build -t {{ project_name }} .
-```
-
-### Run
-```sh
-docker run {{ docker_run_flags }} {{ project_name }}
-```
-{{ end }}
-
-{{ if has_docker_compose }}
-### Start all services
-```sh
-{{ docker_compose_command }} up -d
-```
-
-### View logs
-```sh
-{{ docker_compose_command }} logs -f
-```
-
-### Stop all services
-```sh
-{{ docker_compose_command }} down
-```
-
-### Rebuild
-```sh
-{{ docker_compose_command }} up -d --build
-```
-{{ end }}
-`````
-
-#### deploy.md
-
-**Trigger:** CI/CD detected (section 8.8).
-
-`````markdown
----
-description: Prepare and trigger a deployment
-allowed-tools: Bash, Read, Grep, Glob
----
-
-# Deploy
-
-## Pre-deployment Checklist
-
-{{ if lint_command }}
-1. Lint: `{{ lint_command }}`
-{{ end }}
-{{ if test_command }}
-2. Tests: `{{ test_command }}`
-{{ end }}
-{{ if build_command }}
-3. Build: `{{ build_command }}`
-{{ end }}
-
-## Deploy
-
-{{ if ci_platform == "GitHub Actions" }}
-- Push to the deploy branch or create a release tag.
-- Monitor: check the Actions tab or run `gh run list`.
-{{ end }}
-{{ if ci_platform == "GitLab CI" }}
-- Push to the deploy branch.
-- Monitor: check the CI/CD pipelines page.
-{{ end }}
-{{ if ci_platform == "Vercel" }}
-- Push to `{{ default_branch }}` for production, or push to a branch for preview.
-- Monitor: `vercel` or check the Vercel dashboard.
-{{ end }}
-{{ if ci_platform == "Netlify" }}
-- Push to `{{ default_branch }}` for production.
-- Monitor: check the Netlify dashboard.
-{{ end }}
-{{ if ci_platform == "Railway" or ci_platform == "Fly.io" or ci_platform == "Render" }}
-- Push to the linked branch.
-- Monitor: check the {{ ci_platform }} dashboard.
-{{ end }}
-`````
-
-#### new-package.md
-
-**Trigger:** Monorepo detected (section 8.5).
-
-`````markdown
----
-description: Create a new package in the monorepo
-allowed-tools: Bash, Read, Write, Glob, Grep
----
-
-# New Package
-
-## Arguments
-
-- **name** (required): Package name (e.g., `utils`, `api-client`)
-- **type** (optional): `lib` or `app` (default: `lib`)
-
-## Steps
-
-1. Create directory: `{{ workspace_root }}/{{ name }}/`
-2. Initialize package config:
-{{ if package_manager == "pnpm" or package_manager == "npm" or package_manager == "yarn" }}
-{{ if workspace_scope }}
-   - Create `package.json` with name `{{ workspace_scope }}/{{ name }}`
-{{ else }}
-   - Create `package.json` with name `{{ name }}`
-{{ end }}
-{{ end }}
-{{ if monorepo_tool == "Nx" }}
-   - Create `project.json` with targets for build, test, lint.
-{{ end }}
-{{ if monorepo_tool == "Turborepo" }}
-   - Ensure `turbo.json` pipeline covers the new package's tasks.
-{{ end }}
-3. Add standard files:
-   - `src/index.{{ extension }}` — entry point
-   - `tsconfig.json` (if TypeScript)
-{{ if test_command }}
-   - Test file following project pattern
-{{ end }}
-4. Register the package:
-{{ if package_manager == "pnpm" }}
-   - Verify `pnpm-workspace.yaml` glob covers `{{ workspace_root }}/*`
-{{ end }}
-{{ if package_manager == "npm" or package_manager == "yarn" }}
-   - Verify `package.json` workspaces glob covers `{{ workspace_root }}/*`
-{{ end }}
-5. Run `{{ install_command }}` to link the new package.
+End with a summary: total findings by severity, overall assessment (approve / request changes).
 `````
 
 ### Command Variable Reference
 
 | Variable | Source | Example |
 |----------|--------|---------|
-| `frontend_framework` | Section 8.2 frontend framework detection | `React`, `Vue`, `Svelte` |
-| `component_directory` | Glob for existing component patterns | `src/components` |
-| `component_extension` | Section 8.1 language + 8.2 framework | `.tsx`, `.jsx`, `.vue` |
-| `typescript` | Section 8.1 TypeScript detection | `true` / `false` |
-| `styling_framework` | Section 8.2 styling framework detection | `Tailwind`, `CSS Modules` |
-| `app_router_framework` | Section 8.2 app router framework detection | `Next.js`, `Nuxt`, `SvelteKit` |
-| `pages_directory` | Glob for existing page/route patterns | `src/app`, `app` |
-| `route_segments` | Derived from user input | `dashboard/settings` |
-| `route_file` | Derived from user input (Remix flat-file convention) | `dashboard.settings` |
 | `default_branch` | `git symbolic-ref refs/remotes/origin/HEAD` or git history | `main`, `master` |
-| `extension` | Section 8.1 language detection | `tsx`, `ts`, `js` |
-| `backend_framework` | Section 8.2 backend framework detection | `Express`, `FastAPI`, `Gin` |
-| `api_directory` | Glob for existing route/controller patterns | `src/routes`, `app/api` |
-| `test_file_pattern` | Glob for existing test file patterns | `__tests__/*.test.ts`, `*_test.go` |
-| `e2e_directory` | Section 8.6 E2E framework detection | `e2e/`, `cypress/e2e/` |
-| `has_dockerfile` | Section 8.11 Dockerfile detection | `true` / `false` |
-| `has_docker_compose` | Section 8.11 docker-compose detection | `true` / `false` |
-| `docker_run_flags` | Derived from Dockerfile (EXPOSE ports) | `-p 3000:3000` |
-| `docker_compose_command` | Section 8.11 compose file variant | `docker compose`, `docker-compose` |
-| `ci_platform` | Section 8.8 CI/CD platform detection | `GitHub Actions`, `Vercel` |
-| `workspace_root` | Section 8.5 workspace discovery | `packages`, `apps` |
-| `workspace_scope` | Section 8.5 workspace discovery → package prefix | `@myorg` |
-| `monorepo_tool` | Section 8.5 monorepo detection | `Nx`, `Turborepo`, `Lerna` |
-| `package_manager` | Section 8.3 package manager detection | `pnpm`, `npm`, `yarn` |
-| `install_command` | Section 8.3 package manager detection | `pnpm install`, `npm install` |
+| `commit_format_description` | Section 8.12 git convention detection | `Conventional commits, lowercase` |
+| `lint_command` | Section 8.7 linter detection | `npm run lint` |
+| `typecheck_command` | Section 8.7 or script detection | `npx tsc --noEmit` |
+| `test_command` | Section 8.6 test framework detection | `npm test`, `go test ./...` |
+| `single_test_command` | Section 8.6 test command extraction | `npx jest path/to/test` |
+| `build_command` | Section 8.14 script detection | `npm run build` |
+| `naming_conventions` | Section 1.5 source file analysis | list of `{scope, convention, example}` |
 
 ---
 
 ## 9.3 Skill Templates
 
-Each skill is generated as a `SKILL.md` file inside `.claude/skills/<skill-name>/`. Skills auto-activate when Claude detects a matching user intent — the `description` field in frontmatter is the primary trigger mechanism.
+Each skill is generated as a `SKILL.md` file inside `.claude/skills/<skill-name>/`. Skills encode **methodology** — structured approaches to recurring development tasks. They teach Claude *how* to work, not just *what* exists.
+
+**Design principles for skills:**
+- Skills encode decision-making methodology, not information dumps
+- Every skill starts with codebase exploration before action
+- Skills have clear phases with concrete outputs
+- Skills teach principles that survive codebase changes
+- Never duplicate what belongs in CLAUDE.md — skills are for *how*, CLAUDE.md is for *what*
 
 ### Writing Good Skill Descriptions
 
@@ -786,122 +457,236 @@ The description determines when Claude auto-activates the skill. Getting it righ
 - **Too narrow** → misses relevant tasks (e.g., "handles PostgreSQL migration rollbacks" misses schema creation)
 - **Just right** → lists 3-7 specific intents the skill covers
 
-**Pattern:** Start with a one-sentence purpose, then list trigger intents as bullet points or comma-separated phrases. Use action verbs that match how developers phrase requests.
+**Pattern:** Start with a one-sentence purpose, then list trigger intents as comma-separated phrases. Use action verbs that match how developers phrase requests.
 
 ### Universal Skills (always generate)
 
-#### code-conventions/SKILL.md
+#### implement-feature/SKILL.md
 
 **Trigger:** Always generate.
 
 `````markdown
 ---
-name: code-conventions
+name: implement-feature
 description: >
-  {{ project_name }} coding style and conventions.
-  Activates when: writing new code, reviewing style, renaming variables,
-  organizing imports, handling errors, structuring files.
+  Structured feature implementation methodology. Activates when: implementing a new feature,
+  adding functionality, building a new module, creating a new endpoint or component,
+  extending existing behavior. Ensures codebase exploration before writing code.
 ---
 
-# Code Conventions for {{ project_name }}
+# Feature Implementation Methodology
 
-{{ if naming_conventions }}
-## Naming
+## Principle: Explore Before You Build
 
-{{ for each naming_convention }}
-- **{{ scope }}**: {{ convention }} (e.g., `{{ example }}`)
-{{ end }}
-{{ end }}
+Never write code based on assumptions. Always verify against the actual codebase first.
 
-{{ if import_organization_description }}
-## Imports
+## Workflow
 
-{{ import_organization_description }}
-{{ end }}
+### 1. Scope
 
-{{ if error_handling_description }}
-## Error Handling
+- What exactly needs to work when this is done?
+- What does NOT need to change?
+- Are there existing patterns that solve part of this?
 
-{{ error_handling_description }}
-{{ end }}
+### 2. Explore the Codebase
 
-{{ if file_organization_description }}
-## File Organization
+- Search for related code — similar features, shared utilities, domain objects.
+- Read existing implementations of the closest analog.
+- Identify: file structure, naming patterns, error handling, test patterns.
+- Note which files will need to change and in what order.
 
-{{ file_organization_description }}
-{{ end }}
+### 3. Plan the Changes
 
-{{ if architecture_pattern_description }}
-## Architecture
+- List files to create or modify, in order of dependency.
+- Keep the plan to 3-7 steps. If it's longer, split the feature.
+- Get user approval before writing code.
 
-{{ architecture_pattern_description }}
-{{ end }}
+### 4. Implement Incrementally
+
+- One logical change at a time.
+- After each change, validate (lint, test, type-check if available).
+- If a step fails validation, fix it before moving on.
+- Follow existing project patterns exactly — consistency beats novelty.
+
+### 5. Validate
+
+- All existing tests pass.
+- New behavior has tests.
+- Linter and type-checker pass.
+- Build succeeds.
 `````
 
-#### project-context/SKILL.md
+#### fix-bug/SKILL.md
 
 **Trigger:** Always generate.
 
 `````markdown
 ---
-name: project-context
+name: fix-bug
 description: >
-  {{ project_name }} architecture and project context.
-  Activates when: asking about project structure, understanding how modules connect,
-  finding where code lives, onboarding to the codebase, making architectural decisions.
+  Bug triage and fix methodology. Activates when: fixing a bug, debugging an issue,
+  investigating unexpected behavior, triaging an error, diagnosing a failure,
+  handling a crash or exception. Ensures root cause analysis before applying fixes.
 ---
 
-# Project Context — {{ project_name }}
+# Bug Fix Methodology
 
-## Tech Stack
+## Principle: Fix Causes, Not Symptoms
 
-{{ if primary_framework }}
-- **Framework:** {{ primary_framework }}
-{{ end }}
-- **Language:** {{ language }}
-{{ if package_manager }}
-- **Package Manager:** {{ package_manager }}
-{{ end }}
-{{ if database_engine }}
-- **Database:** {{ database_engine }}
-{{ end }}
-{{ if orm_name }}
-- **ORM:** {{ orm_name }}
-{{ end }}
+A symptom fix hides the bug. A root cause fix eliminates it.
 
-## Directory Structure
+## Workflow
 
-{{ for each top_level_directory }}
-- `{{ directory_name }}/` — {{ directory_purpose }}
-{{ end }}
+### 1. Reproduce
 
-{{ if monorepo }}
-## Workspaces
+- Understand: what happens vs. what should happen.
+- Find the code path — use Grep to trace from the error/symptom to source.
+- Write a failing test if possible — this is your proof the bug exists.
 
-| Package | Path | Purpose |
-|---------|------|---------|
-{{ for each workspace }}
-| {{ workspace_name }} | `{{ workspace_path }}` | {{ workspace_purpose }} |
-{{ end }}
-{{ end }}
+### 2. Diagnose
 
-## Key Commands
+- Trace execution from input to incorrect output.
+- Ask: why does this code produce this result?
+- Identify the root cause, not just where it manifests.
+- Common root causes: off-by-one, null reference, race condition, incorrect assumption, stale state.
 
-{{ if dev_command }}
-- **Dev:** `{{ dev_command }}`
-{{ end }}
-{{ if build_command }}
-- **Build:** `{{ build_command }}`
-{{ end }}
-{{ if test_command }}
-- **Test:** `{{ test_command }}`
-{{ end }}
-{{ if lint_command }}
-- **Lint:** `{{ lint_command }}`
-{{ end }}
+### 3. Fix
+
+- Apply the **minimal change** that addresses the root cause.
+- Do NOT refactor surrounding code — scope creep turns a fix into a rewrite.
+- If the fix reveals a deeper design issue, note it separately for follow-up.
+
+### 4. Verify
+
+- The failing test now passes.
+- All existing tests still pass.
+- The original reported behavior is resolved.
+
+### 5. Prevent
+
+- Could this class of bug recur? If so, add a guard (validation, type constraint, assertion).
+- Document the root cause in the commit message.
+`````
+
+#### improve-architecture/SKILL.md
+
+**Trigger:** Always generate.
+
+`````markdown
+---
+name: improve-architecture
+description: >
+  Architecture improvement methodology. Activates when: improving code structure,
+  reducing complexity, identifying technical debt, evaluating design alternatives,
+  proposing refactoring, analyzing module boundaries, reducing coupling,
+  discussing architecture decisions.
+---
+
+# Architecture Improvement Methodology
+
+## Principle: Deep Modules Over Shallow Wrappers
+
+Good modules have simple interfaces and complex implementations. Bad modules have complex interfaces that just delegate to other complex modules. (John Ousterhout, "A Philosophy of Software Design")
+
+## Workflow
+
+### 1. Explore Organically
+
+- Navigate the codebase without a specific target. Follow imports, read call sites.
+- Identify friction points: where is the code hard to change? Where do changes cascade?
+- Note: files that change together, modules with circular dependencies, functions with too many parameters.
+
+### 2. Identify Candidates
+
+- List 2-3 specific areas where architecture improvements would have the highest impact.
+- For each candidate: what's the current pain? What would "better" look like? What's the blast radius?
+
+### 3. Design Alternatives
+
+- For the top candidate, design at least 2 different approaches.
+- Each approach should make different trade-offs (simplicity vs. flexibility, consistency vs. performance).
+- Be explicit about what each approach sacrifices.
+
+### 4. Evaluate
+
+- Which approach minimizes the interface surface while maximizing capability?
+- Which is easiest to migrate to incrementally (no big-bang rewrite)?
+- Which keeps existing tests passing with minimal changes?
+
+### 5. Recommend
+
+- Present findings with evidence (specific files, specific pain points).
+- Recommend one approach with reasoning.
+- Include a migration path: what changes first, what changes last.
 `````
 
 ### Conditional Skills
+
+#### tdd/SKILL.md
+
+**Trigger:** Test framework detected (section 8.6).
+
+`````markdown
+---
+name: tdd
+description: >
+  Test-Driven Development methodology. Activates when: writing tests first,
+  doing TDD, red-green-refactor, test-first development, writing tests
+  before implementation, behavior-driven development.
+---
+
+# Test-Driven Development
+
+## Principle: Tests Describe Behavior, Not Implementation
+
+Write tests that verify WHAT the code does, not HOW it does it. Tests that reach into implementation details break on every refactor.
+
+## The Cycle
+
+### Red — Write a Failing Test
+
+- Write ONE test for ONE behavior.
+- The test should describe what the user/caller expects, not internal mechanics.
+- Run it — confirm it fails for the right reason.
+
+### Green — Make It Pass
+
+- Write the MINIMUM code to make the test pass.
+- Resist the urge to write more than needed. Ugly is fine at this stage.
+- Run the test — confirm it passes.
+
+### Refactor — Clean Up
+
+- Now improve the code: extract, rename, simplify.
+- Run tests after each change — they must stay green.
+- Only refactor code you just wrote, not the whole file.
+
+## Vertical Slices
+
+Implement features as vertical slices through the system:
+
+- One test → one implementation → one refactor.
+- Each slice delivers a complete behavior (not a layer).
+- Example: "user can create a post" is a slice. "add the database schema" is NOT a slice — it's a layer.
+
+## Test Granularity
+
+- **Unit tests:** for pure logic, calculations, transformations.
+- **Integration tests:** for code that touches external systems (DB, API, filesystem).
+- Don't mock what you own — test against the real dependency when practical.
+
+## Commands
+
+{{ if test_command }}
+- Run all: `{{ test_command }}`
+{{ end }}
+{{ if single_test_command }}
+- Run one: `{{ single_test_command }}`
+{{ end }}
+{{ if coverage_command }}
+- Coverage: `{{ coverage_command }}`
+{{ end }}
+`````
 
 #### design-system/SKILL.md
 
@@ -918,28 +703,29 @@ description: >
 
 # Design System — {{ project_name }}
 
-## Styling Approach
+## Stack
 
 - **Framework:** {{ styling_framework }}
 {{ if design_system_config }}
 - **Config:** `{{ design_system_config }}`
 {{ end }}
-
-{{ if styling_framework == "Tailwind" }}
-## Tailwind Conventions
-
-- Reference `tailwind.config` for custom theme values (colors, spacing, breakpoints).
-- Use utility classes directly; avoid `@apply` unless creating reusable component styles.
-- Follow the project's existing class ordering pattern.
-{{ end }}
-
 {{ if component_library }}
-## Component Library
-
-- **Library:** {{ component_library }}
-- Import components from `{{ component_library_import }}`.
-- Follow existing usage patterns found in the codebase.
+- **Component library:** {{ component_library }} (import from `{{ component_library_import }}`)
 {{ end }}
+
+## Decision Guide
+
+When styling a new component:
+
+1. **Check existing components first** — search for a similar component in the codebase. Reuse before creating.
+{{ if component_library }}
+2. **Use {{ component_library }} components** as the base — don't rebuild what the library provides.
+{{ end }}
+{{ if styling_framework == "Tailwind" }}
+3. **Use Tailwind utilities directly** — reference `{{ design_system_config }}` for custom theme values. Avoid `@apply` unless creating reusable component styles.
+4. **Follow existing class ordering** — check nearby components for the established pattern.
+{{ end }}
+5. **Match existing spacing, sizing, and color patterns** — don't introduce new values without checking the config.
 `````
 
 #### api-patterns/SKILL.md
@@ -952,35 +738,39 @@ name: api-patterns
 description: >
   {{ project_name }} API design patterns and conventions.
   Activates when: creating endpoints, designing request/response schemas,
-  handling API errors, adding middleware, structuring routes, writing API docs.
+  handling API errors, adding middleware, structuring routes.
 ---
 
 # API Patterns — {{ project_name }}
 
-## Framework
+## Stack
 
 - **Backend:** {{ backend_framework }}
 {{ if api_directory }}
-- **Routes directory:** `{{ api_directory }}/`
+- **Routes:** `{{ api_directory }}/`
 {{ end }}
-
-## Conventions
-
-- Find existing endpoints with `Grep` and follow the same patterns.
-- Check for:
-  - Route naming conventions (plural nouns, kebab-case, etc.)
-  - Request validation approach
-  - Response format (envelope pattern, direct, etc.)
-  - Error response structure
 {{ if orm_name }}
-  - Data access pattern ({{ orm_name }} queries)
+- **Data access:** {{ orm_name }}
 {{ end }}
+
+## Decision Guide
+
+When creating or modifying an endpoint:
+
+1. **Find the closest existing endpoint** — use Grep to find a similar route. Match its structure exactly.
+2. **Follow the project's established patterns** for:
+   - Route naming (check: plural nouns? kebab-case? nested resources?)
+   - Request validation (check: where and how is input validated?)
+   - Response format (check: envelope pattern? direct? status codes?)
+   - Error handling (check: how are errors structured and returned?)
+   - Auth/middleware (check: what guards are applied and where?)
+3. **Don't invent new patterns** — consistency beats novelty.
 
 {{ if api_spec }}
-## API Specification
+## API Spec
 
 - **Spec file:** `{{ api_spec }}`
-- Keep spec in sync with implementation.
+- Keep the spec in sync with implementation.
 {{ end }}
 `````
 
@@ -994,7 +784,7 @@ name: schema-patterns
 description: >
   {{ project_name }} database schema and data access patterns.
   Activates when: creating models, writing migrations, querying data,
-  designing relationships, optimizing queries, managing database schema.
+  designing relationships, optimizing queries.
 ---
 
 # Schema Patterns — {{ project_name }}
@@ -1006,18 +796,20 @@ description: >
 - **ORM:** {{ orm_name }}
 {{ end }}
 {{ if schema_directory }}
-- **Schema location:** `{{ schema_directory }}/`
+- **Schema:** `{{ schema_directory }}/`
 {{ end }}
 
-## Conventions
+## Decision Guide
 
-- Find existing models/schemas with `Glob` and follow the same patterns.
-- Check for:
-  - Naming conventions (table names, column names)
-  - Primary key strategy (auto-increment, UUID, etc.)
-  - Relationship patterns (foreign keys, join tables)
-  - Soft delete vs hard delete
-  - Timestamp columns (created_at, updated_at)
+When modifying the schema:
+
+1. **Read existing models first** — search for similar entities. Match naming, type choices, and relationship patterns exactly.
+2. **Check conventions** for:
+   - Primary keys (auto-increment, UUID, ULID?)
+   - Timestamps (created_at, updated_at — present? auto-managed?)
+   - Soft delete vs hard delete
+   - Naming (snake_case tables? singular or plural?)
+   - Index patterns
 
 {{ if migration_command }}
 ## Migrations
@@ -1028,178 +820,337 @@ description: >
 {{ end }}
 `````
 
-#### test-patterns/SKILL.md
-
-**Trigger:** Test framework detected (section 8.6).
-
-`````markdown
----
-name: test-patterns
-description: >
-  {{ project_name }} testing patterns and conventions.
-  Activates when: writing tests, setting up test fixtures, mocking dependencies,
-  checking test coverage, debugging failing tests, structuring test files.
----
-
-# Test Patterns — {{ project_name }}
-
-## Framework
-
-- **Test runner:** {{ test_framework }}
-{{ if e2e_framework }}
-- **E2E:** {{ e2e_framework }}
-{{ end }}
-
-## Conventions
-
-- Find existing tests with `Glob` and follow the same structure.
-{{ if test_file_pattern }}
-- **Test file pattern:** `{{ test_file_pattern }}`
-{{ end }}
-- Check for:
-  - Test organization (describe/it, test suites, table-driven)
-  - Setup/teardown patterns (beforeEach, fixtures, factories)
-  - Mocking approach (jest.mock, dependency injection, test doubles)
-  - Assertion style (expect, assert, should)
-
-## Commands
-
-- **Run all:** `{{ test_command }}`
-- **Run one:** `{{ single_test_command }}`
-{{ if coverage_command }}
-- **Coverage:** `{{ coverage_command }}`
-{{ end }}
-`````
-
 ### Skill Variable Reference
 
 | Variable | Source | Example |
 |----------|--------|---------|
-| `top_level_directory` | Directory listing of project root | list of `{directory_name, directory_purpose}` |
-| `directory_name` | `ls` output | `src`, `tests`, `scripts` |
-| `directory_purpose` | Inferred from directory name + contents | `application source code` |
+| `project_name` | `package.json` name or directory name | `my-app` |
+| `test_command` | Section 8.6 test framework detection | `npm test`, `go test ./...` |
+| `single_test_command` | Section 8.6 test command extraction | `npx jest path/to/test` |
+| `coverage_command` | Section 8.14 script detection | `npm run test:coverage` |
+| `styling_framework` | Section 8.2 styling framework detection | `Tailwind`, `CSS Modules` |
 | `design_system_config` | Glob for styling config files | `tailwind.config.ts` |
 | `component_library` | Section 8.2 styling framework detection | `shadcn/ui`, `MUI` |
-| `component_library_import` | Grep for existing import patterns | `@/components/ui`, `@mui/material` |
-| `api_spec` | Glob for OpenAPI/Swagger files | `openapi.yaml`, `swagger.json` |
+| `component_library_import` | Grep for existing import patterns | `@/components/ui` |
+| `backend_framework` | Section 8.2 backend framework detection | `Express`, `FastAPI`, `Gin` |
+| `api_directory` | Glob for existing route/controller patterns | `src/routes`, `app/api` |
+| `orm_name` | Section 8.2 ORM framework detection | `Prisma`, `SQLAlchemy` |
+| `api_spec` | Glob for OpenAPI/Swagger files | `openapi.yaml` |
+| `database_engine` | Section 8.9 database detection | `PostgreSQL` |
 | `schema_directory` | Glob for schema/model files | `prisma/`, `src/models/` |
-| `test_framework` | Section 8.6 test framework detection | `Jest`, `Vitest`, `pytest` |
+| `migration_command` | Section 8.14 script detection or ORM conventions | `npx prisma migrate dev` |
 
 ---
 
 ## 9.4 Agent Templates
 
-Agents run in separate context windows or worktrees. Generate only when **all three criteria** are met:
+Agents are specialized team members that run in separate context windows or worktrees. Each agent has a clear persona, philosophy, deliverables, and self-validation process.
 
-1. **Separate context** — task benefits from its own context window (avoids polluting main conversation)
-2. **File conflicts** — task modifies files that could conflict with ongoing work
-3. **Validation tooling** — project has tools to verify the agent's output (linter, tests, type checker)
+**Design principles for agents:**
+- Every agent has a specific expertise and philosophy — not a generic assistant
+- Agents produce concrete deliverables, not vague advice
+- Agents self-validate their output using the project's actual tools
+- Agents that write code run in worktrees to avoid conflicting with in-progress work
+- Read-only agents (architect, reviewer) don't need worktrees
 
-If any criterion is not met, do not generate the agent.
+**Generation criteria — generate an agent when:**
 
-### reviewer.md
+1. **Specialized expertise** — task benefits from focused context and a defined approach
+2. **Clear deliverables** — agent produces specific, verifiable output
+3. **Self-validation** — output can be verified by tests, linter, human review, or the agent itself
 
-**Trigger:** Linter detected (section 8.7) AND test framework detected (section 8.6).
+### implementer.md
 
-**Justification:** Code review benefits from a fresh perspective (separate context). The reviewer reads but does not modify files. Linter and tests validate its suggestions.
+**Trigger:** Test framework detected (section 8.6) AND linter detected (section 8.7).
+
+**Justification:** Feature implementation benefits from isolation (worktree) to avoid conflicting with in-progress work. Tests + linter validate that the implementation is correct.
 
 `````markdown
 ---
-description: Review code changes in a separate context for objectivity
+description: Implement features in an isolated worktree with validation at each step
+model: {{ model }}
+allowed-tools: Bash, Read, Write, Glob, Grep
+isolation: worktree
+---
+
+# Implementer
+
+You are a senior developer implementing features for {{ project_name }}.
+
+## Philosophy
+
+- Explore before you build — read existing code, follow established patterns.
+- Implement incrementally — one logical step at a time, validate after each.
+- Simplest code that works — don't over-engineer, refactor later if needed.
+- Leave the codebase better than you found it, but don't refactor beyond scope.
+
+## Process
+
+1. **Understand** — Read the feature description. Clarify ambiguities before writing code.
+2. **Explore** — Find related code: similar features, shared patterns, domain objects. Read 3-5 existing files that do something analogous.
+3. **Plan** — List the files to create/modify, in dependency order. Keep to 3-7 steps.
+4. **Implement** — One change at a time. After each:
+{{ if lint_command }}
+   - `{{ lint_command }}` — fix violations immediately
+{{ end }}
+{{ if typecheck_command }}
+   - `{{ typecheck_command }}` — fix type errors immediately
+{{ end }}
+{{ if test_command }}
+   - `{{ test_command }}` — ensure nothing broke
+{{ end }}
+5. **Test** — Write tests for all new behavior. Cover happy path, edge cases, and error cases.
+6. **Final validation:**
+{{ if test_command }}
+   - `{{ test_command }}` — all tests pass
+{{ end }}
+{{ if lint_command }}
+   - `{{ lint_command }}` — no violations
+{{ end }}
+{{ if build_command }}
+   - `{{ build_command }}` — build succeeds
+{{ end }}
+
+## Deliverables
+
+- Working implementation that follows existing project patterns.
+- Tests for all new behavior.
+- All validation checks pass.
+`````
+
+### architect.md
+
+**Trigger:** Always generate.
+
+**Justification:** Architecture analysis benefits from a separate, focused context. The architect reads extensively without polluting the main conversation. Output is a design document verified by human review.
+
+`````markdown
+---
+description: Analyze codebase architecture and design solutions with trade-off evaluation
+model: {{ model }}
+allowed-tools: Bash, Read, Glob, Grep
+---
+
+# Architect
+
+You are a software architect analyzing {{ project_name }}.
+
+## Philosophy
+
+- Deep modules with simple interfaces beat shallow wrappers with complex interfaces.
+- Every design decision is a trade-off — make the trade-off explicit.
+- Consistency across the codebase matters more than local perfection.
+- Incremental migration beats big-bang rewrites.
+
+## Process
+
+1. **Explore** — Navigate the codebase organically. Follow imports, read call sites, trace data flow. Spend time understanding before proposing.
+2. **Map** — Identify: module boundaries, dependency directions, coupling points, hot spots (files that change together frequently).
+3. **Analyze** — For the area in question:
+   - What's the current structure and why?
+   - Where are the friction points?
+   - What constraints exist (performance, compatibility, team familiarity)?
+4. **Design** — Propose 2-3 alternative approaches:
+   - For each: describe the structure, list pros/cons, estimate migration effort.
+   - Be explicit about what each approach sacrifices.
+5. **Recommend** — Pick one approach with clear reasoning. Include a step-by-step migration path.
+
+## Deliverables
+
+- Architecture analysis with evidence (specific files, specific pain points).
+- 2-3 design alternatives with trade-off comparison.
+- Recommended approach with incremental migration steps.
+`````
+
+### reviewer.md
+
+**Trigger:** Linter detected (section 8.7) OR test framework detected (section 8.6).
+
+**Justification:** Code review benefits from a fresh perspective (separate context). The reviewer reads but does not modify files. Linter and tests validate its findings.
+
+`````markdown
+---
+description: Review code changes with severity-tagged findings and educational feedback
 model: {{ model }}
 allowed-tools: Bash, Read, Grep, Glob
 ---
 
-# Code Reviewer
+# Reviewer
 
-You are reviewing changes in {{ project_name }}.
+You are a code reviewer for {{ project_name }}.
+
+## Philosophy
+
+- Reviews are educational opportunities, not gatekeeping.
+- One review, complete feedback — don't drip-feed comments across rounds.
+- Every critique includes a suggested fix, not just a complaint.
+- Acknowledge strong implementations — positive signal matters.
 
 ## Process
 
 1. Run `git diff {{ default_branch }}` to see all changes.
-2. For each changed file, analyze:
-   - Correctness and edge cases
-   - Security concerns (OWASP top 10)
-   - Performance implications
+2. For each changed file, check:
+   - **Correctness:** logic errors, edge cases, off-by-one, null handling, race conditions
+   - **Security:** injection, XSS, auth bypass, secrets in code, OWASP top 10
+   - **Performance:** N+1 queries, unnecessary allocations, missing indexes, unbounded loops
 {{ if naming_conventions }}
-   - Adherence to project naming conventions
+   - **Conventions:** {{ for each naming_convention }}{{ scope }}: {{ convention }}; {{ end }}
 {{ end }}
 {{ if test_command }}
-3. Run `{{ test_command }}` to verify tests pass.
+3. Run `{{ test_command }}` — report failures.
 {{ end }}
 {{ if lint_command }}
-4. Run `{{ lint_command }}` to verify lint passes.
+4. Run `{{ lint_command }}` — report violations.
 {{ end }}
-5. Output findings as: **file:line** — severity — description — fix.
+
+## Output Format
+
+Tag each finding:
+
+- **blocker** — must fix before merge (bugs, security, data loss risk)
+- **suggestion** — should fix (performance, readability, maintainability)
+- **nit** — optional (style, minor preference)
+
+Format: `**file:line** — severity — description — suggested fix`
+
+## Deliverables
+
+- Finding list with severity tags and suggested fixes.
+- Summary table: blockers / suggestions / nits count.
+- Overall verdict: approve or request changes.
 `````
 
-### test-writer.md
+### qa.md
 
 **Trigger:** Test framework detected (section 8.6).
 
-**Justification:** Writing tests benefits from isolation (worktree) to avoid conflicting with in-progress work. Test framework validates output directly.
+**Justification:** QA analysis benefits from focused context. The QA agent reads code and runs tests extensively. Test framework validates findings directly.
 
 `````markdown
 ---
-description: Generate tests for specified files in an isolated worktree
+description: Run comprehensive quality checks and identify test gaps with evidence
 model: {{ model }}
-allowed-tools: Bash, Read, Write, Glob, Grep
-isolation: worktree
+allowed-tools: Bash, Read, Glob, Grep
 ---
 
-# Test Writer
+# QA
 
-You are writing tests for {{ project_name }}.
+You are a QA specialist for {{ project_name }}.
+
+## Philosophy
+
+- Default to skepticism — assume there are bugs until proven otherwise.
+- Evidence over assumptions — run the tests, read the output, verify the behavior.
+- Focus on what's NOT tested — untested code paths are where bugs hide.
+- Test the boundaries: empty input, max values, concurrent access, invalid state.
 
 ## Process
 
-1. Read the target file(s) to understand the code.
-2. Find existing tests with `Glob` to learn the project's test patterns:
-{{ if test_file_pattern }}
-   - Pattern: `{{ test_file_pattern }}`
-{{ end }}
-3. Write tests covering:
-   - Happy path for each public function/method
-   - Edge cases (null, empty, boundary values)
-   - Error cases and exception handling
-4. Run the tests: `{{ single_test_command }}`
-5. Fix any failures.
+1. **Run the full test suite:**
+   ```sh
+   {{ test_command }}
+   ```
+   Record: total tests, passed, failed, skipped.
+
 {{ if coverage_command }}
-6. Check coverage: `{{ coverage_command }}`
+2. **Check coverage:**
+   ```sh
+   {{ coverage_command }}
+   ```
+   Identify files and functions with low or no coverage.
 {{ end }}
+
+3. **Identify test gaps** — For each recently changed file:
+   - Does it have a corresponding test file?
+   - Are edge cases covered (null, empty, boundary, error)?
+   - Are integration points tested (API calls, DB queries, external services)?
+
+{{ if e2e_command }}
+4. **Run E2E tests:**
+   ```sh
+   {{ e2e_command }}
+   ```
+{{ end }}
+
+5. **Report findings** with evidence from actual test output.
+
+## Deliverables
+
+- Test execution report (pass/fail/skip counts).
+- Coverage gap analysis (specific files, functions, and line ranges).
+- Prioritized list of recommended tests to add (highest-risk gaps first).
+- Risk assessment: which untested areas are most likely to break.
 `````
 
-### refactor-agent.md
+### fixer.md
 
-**Trigger:** Test framework detected (section 8.6) AND linter detected (section 8.7) AND good test coverage observed.
+**Trigger:** Test framework detected (section 8.6).
 
-**Justification:** Refactoring modifies many files (conflict risk). Worktree isolation keeps main work safe. Tests + linter validate that behavior is preserved.
+**Justification:** Bug fixing benefits from isolation (worktree) to avoid conflicting with in-progress work. Test framework validates the fix and prevents regression.
 
 `````markdown
 ---
-description: Refactor code safely in an isolated worktree
+description: Fix bugs in an isolated worktree with root cause analysis and regression testing
 model: {{ model }}
 allowed-tools: Bash, Read, Write, Glob, Grep
 isolation: worktree
 ---
 
-# Refactor Agent
+# Fixer
 
-You are refactoring code in {{ project_name }}.
+You are a bug fix specialist for {{ project_name }}.
+
+## Philosophy
+
+- Fix causes, not symptoms — a symptom fix hides the bug; a root cause fix eliminates it.
+- Minimal change — the smallest diff that fixes the bug is the best diff.
+- Prove it — write a test that fails before the fix and passes after.
+- Don't refactor while fixing — that's a separate task with separate risk.
 
 ## Process
 
-1. Run tests first to establish baseline: `{{ test_command }}`
-2. Make incremental changes — one refactoring step at a time.
-3. After each change:
-{{ if lint_command }}
-   - Run `{{ lint_command }}`
+1. **Reproduce** — Understand the bug: what happens vs. what should happen.
+2. **Find the code** — Use Grep to trace from the symptom to the source.
+3. **Write a failing test** — This proves the bug exists and prevents regression.
+{{ if single_test_command }}
+   Run: `{{ single_test_command }}` — confirm it fails for the right reason.
 {{ end }}
-   - Run `{{ test_command }}`
-   - If tests fail, revert the last change.
-4. Keep changes minimal and focused.
-5. Do not change behavior — only structure, naming, and organization.
+4. **Diagnose** — Trace execution to find the root cause. Ask: why does this code produce this result?
+5. **Fix** — Apply the minimal change to the root cause. Nothing else.
+6. **Verify:**
+{{ if single_test_command }}
+   - The failing test now passes: `{{ single_test_command }}`
+{{ end }}
+{{ if test_command }}
+   - All tests pass: `{{ test_command }}`
+{{ end }}
+{{ if lint_command }}
+   - Linter passes: `{{ lint_command }}`
+{{ end }}
+
+## Deliverables
+
+- Root cause explanation.
+- Minimal code fix.
+- Regression test that catches this specific bug.
+- Verification that all existing tests still pass.
 `````
+
+### Agent Variable Reference
+
+| Variable | Source | Example |
+|----------|--------|---------|
+| `project_name` | `package.json` name or directory name | `my-app` |
+| `model` | Default to `sonnet` for most agents; use `opus` for architect | `sonnet` |
+| `default_branch` | `git symbolic-ref refs/remotes/origin/HEAD` | `main` |
+| `test_command` | Section 8.6 test framework detection | `npm test` |
+| `single_test_command` | Section 8.6 test command extraction | `npx jest path/to/test` |
+| `lint_command` | Section 8.7 linter detection | `npm run lint` |
+| `typecheck_command` | Section 8.7 or script detection | `npx tsc --noEmit` |
+| `build_command` | Section 8.14 script detection | `npm run build` |
+| `coverage_command` | Section 8.14 script detection | `npm run test:coverage` |
+| `e2e_command` | Section 8.6 E2E framework detection | `npx playwright test` |
+| `naming_conventions` | Section 1.5 source file analysis | list of `{scope, convention, example}` |
 
 ---
 
@@ -1286,26 +1237,24 @@ Quick-reference table mapping Phase 1 detections to Phase 2 outputs. Use this as
 
 | Detected | Commands | Skills | Agents | Hooks | MCP |
 |----------|----------|--------|--------|-------|-----|
-| Any project | commit, review, explain | code-conventions, project-context | | | |
-| Frontend framework | component, page | design-system | | | Context7* |
-| Backend framework | endpoint | api-patterns | | | Context7* |
-| Database / ORM | migrate | schema-patterns | | | |
-| Test framework | test | test-patterns | test-writer | | |
-| E2E framework | e2e | | | | |
-| Docker | docker | | | | |
-| CI/CD | deploy | | reviewer | | |
-| Monorepo | new-package | | | | |
+| Any project | commit, implement, fix, review | implement-feature, fix-bug, improve-architecture | architect | | |
+| Frontend framework (styling) | | design-system | | | Context7* |
+| Backend framework | | api-patterns | | | Context7* |
+| Database / ORM | | schema-patterns | | | |
+| Test framework | | tdd | qa, fixer | | |
+| Linter OR test framework | | | reviewer | | |
+| Test framework AND linter | | | implementer | | |
 | Linter | | | | lint pre-commit | |
 | Linter + fast tests | | | | lint+test pre-commit | |
-| Tests + linter + coverage | | | refactor-agent | | |
 
 ### Reading the matrix
 
 - **Rows** are Phase 1 detections. Multiple rows can match simultaneously.
 - **Columns** are Phase 2 output layers. Each cell lists what to generate.
 - Empty cells mean nothing is generated for that combination.
-- "page" command requires an app router framework specifically (Next.js, Nuxt, SvelteKit, Remix), not just any frontend framework.
-- *Context7 is only generated for frameworks listed in section 9.6 (React, Next.js, Vue, Nuxt, Svelte, SvelteKit, Angular, Express, Fastify, NestJS, Django, FastAPI, Flask, Tailwind, Prisma, Drizzle). Not all backend/frontend frameworks have Context7 documentation support.
+- *Context7 is only generated for frameworks listed in section 9.6. Not all backend/frontend frameworks have Context7 documentation support.
+- **Agent model selection:** Use `sonnet` for most agents. Use `opus` for `architect` (benefits from deeper reasoning).
+- **Worktree agents** (`implementer`, `fixer`) require both test framework AND linter to ensure their output can be validated before merging.
 
 ---
 
@@ -1359,7 +1308,7 @@ Skills activate automatically when Claude detects relevant context. You don't ne
 
 ## Your Agents
 
-Agents run in separate context windows for tasks that benefit from isolation.
+Agents run in separate context windows for tasks that benefit from focused expertise.
 
 {{ for each generated agent }}
 - **{{ agent_name }}** — {{ what_it_does }}. Invoke with: `{{ invocation_example }}`

@@ -72,22 +72,25 @@ check_file examples/react-nextjs/CLAUDE.md
 check_file examples/react-nextjs/INSTRUCTION.md
 check_file examples/react-nextjs/.mcp.json
 check_file examples/react-nextjs/.claude/settings.json
-for cmd in commit review explain component page migrate test; do
+# Commands: commit, review are git-tracked; implement, fix are new
+for cmd in commit review; do
   check_file "examples/react-nextjs/.claude/commands/${cmd}.md"
 done
-for skill in code-conventions project-context design-system schema-patterns test-patterns; do
+# Skills: design-system, schema-patterns are git-tracked; methodology skills are new
+for skill in design-system schema-patterns; do
   check_dir "examples/react-nextjs/.claude/skills/${skill}"
 done
-check_file examples/react-nextjs/.claude/agents/test-writer.md
 
 echo ""
 echo "--- go-api ---"
 check_file examples/go-api/CLAUDE.md
 check_file examples/go-api/.claude/settings.json
-for cmd in commit review explain endpoint migrate; do
+# Commands: commit, review are git-tracked; implement, fix are new
+for cmd in commit review; do
   check_file "examples/go-api/.claude/commands/${cmd}.md"
 done
-for skill in code-conventions project-context api-patterns schema-patterns; do
+# Skills: api-patterns, schema-patterns are git-tracked; methodology skills are new
+for skill in api-patterns schema-patterns; do
   check_dir "examples/go-api/.claude/skills/${skill}"
 done
 
@@ -96,13 +99,14 @@ echo "--- python-fastapi ---"
 check_file examples/python-fastapi/CLAUDE.md
 check_file examples/python-fastapi/.mcp.json
 check_file examples/python-fastapi/.claude/settings.json
-for cmd in commit review explain endpoint migrate test; do
+# Commands: commit, review are git-tracked; implement, fix are new
+for cmd in commit review; do
   check_file "examples/python-fastapi/.claude/commands/${cmd}.md"
 done
-for skill in code-conventions project-context api-patterns schema-patterns test-patterns; do
+# Skills: api-patterns, schema-patterns are git-tracked; methodology skills are new
+for skill in api-patterns schema-patterns; do
   check_dir "examples/python-fastapi/.claude/skills/${skill}"
 done
-check_file examples/python-fastapi/.claude/agents/test-writer.md
 
 echo ""
 echo "=== Plugin Manifest ==="

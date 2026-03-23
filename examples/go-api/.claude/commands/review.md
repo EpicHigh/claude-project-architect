@@ -1,21 +1,29 @@
 ---
-description: Review code changes for bugs, style, and improvements
+description: Review code changes with severity-tagged findings and actionable fixes
 allowed-tools: Bash, Read, Grep, Glob
 ---
 
 # Code Review
 
-## What to Review
+## Process
 
 1. Run `git diff main` to see all changes on this branch.
-2. For each changed file, check:
-   - Correctness: logic errors, edge cases, nil pointer handling
-   - Security: injection, secrets, OWASP top 10
-   - Test coverage: new code has tests, existing tests still pass
-   - Readability: clear intent, no unnecessary complexity
+2. For each changed file, analyze:
+   - **Correctness:** logic errors, edge cases, nil pointer handling, race conditions
+   - **Security:** injection, auth bypass, secrets in code, OWASP top 10
+   - **Performance:** N+1 queries, unnecessary allocations, missing indexes, goroutine leaks
+   - **Conventions:** variables: camelCase; types: PascalCase; packages: lowercase
+3. Run `go test ./...` — report any failures.
+4. Run `make lint` — report any violations.
 
 ## Output Format
 
-For each finding:
+Tag each finding with severity:
 
-- **File:line** — severity (bug/warning/nit) — description — suggested fix
+- **blocker** — must fix before merge (bugs, security issues, data loss risk)
+- **suggestion** — should fix, improves quality (performance, readability, maintainability)
+- **nit** — optional, minor style preference
+
+Format: `**file:line** — severity — description — suggested fix`
+
+End with a summary: total findings by severity, overall assessment (approve / request changes).
