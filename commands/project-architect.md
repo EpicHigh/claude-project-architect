@@ -115,20 +115,24 @@ Using your scan findings from Phase 1, generate a tailored `.claude/` configurat
 
 ### 2.1 Read the generation guide
 
-Read `PLUGIN_DIR/references/generation-guide.md` for the complete template catalog. It contains templates for every file you may generate, with `{{ variable }}` placeholders to fill in with project-specific values.
+Read `PLUGIN_DIR/references/generation-guide.md` for guidelines on what good outputs look like. It contains principles, quality criteria, and examples from different stacks — use these as reference for quality, not as templates to fill.
 
-### 2.2 Decide what to generate
+### 2.2 Reason about what to generate
 
-Apply the following decision logic for each layer:
+Based on your Phase 1 findings, reason about what commands, skills, and agents would genuinely help a developer working on THIS project. Consider the unique intersection of technologies — a Next.js + Prisma project needs different agents than a Next.js + Mongoose project.
+
+Use the Output Reasoning Guide (section 9.7) as a starting point, not a checklist:
 
 | Layer | Rule |
 |-------|------|
-| `CLAUDE.md` | **Always generate.** Under 200 lines. Every line must be project-specific — no generic advice like "write clean code." |
-| Commands | Generate based on the selection matrix in generation-guide.md. Universal commands (commit, review, explain) are always generated. Conditional commands only when the relevant stack is detected. |
-| Skills | Generate based on the selection matrix. Universal skills (code-conventions, project-context) are always generated. Conditional skills only when relevant. |
-| Agents | Generate **only** when ALL 3 conditions are true: (1) task benefits from a separate context window, (2) task modifies files that could conflict with main work, (3) project has tooling to validate the agent's output. |
-| Hooks | Generate **only** when ALL 3 conditions are true: (1) tool binary is confirmed installed on the current machine via an actual availability check (for example `command -v`); lockfile/config presence is supporting evidence only, (2) command runs in under 30 seconds, (3) hook includes a comment explaining how to disable it. |
-| `.mcp.json` | Generate only when popular frameworks are detected that benefit from MCP servers (e.g., Context7 for frontend/backend frameworks). |
+| `CLAUDE.md` | **Always generate** using the template in section 9.1. Under 200 lines. Every line must be project-specific. |
+| Commands | **Always generate** commit, implement, fix, review. **Consider** additional commands (optimize-db, security-audit) based on detections. Compose each using your scan results — see section 9.2 for guidelines and examples. |
+| Skills | **Always generate** implement-feature, fix-bug, improve-architecture. **Consider** additional skills based on detections. Compose each with project-specific methodology — see section 9.3 for guidelines. |
+| Agents | **Reason about** which agents would embed useful stack-specific knowledge. Always generate `architect`. Consider others based on detections. Each agent must contain knowledge specific to THIS project's stack intersection — see section 9.4 for guidelines and examples. |
+| Hooks | Generate **only** when ALL 3 conditions are true: (1) tool binary confirmed installed via `command -v`, (2) command runs in under 30 seconds, (3) hook includes a disable comment. Use the exact format in section 9.5. |
+| `.mcp.json` | Generate only when frameworks detected benefit from MCP servers. Use the exact format in section 9.6. |
+
+**Quality bar:** Prefer fewer, higher-quality outputs over many generic ones. For each file you generate, ask: "What does this contain that is specific to THIS project?" If the answer is nothing beyond the project name, either add project-specific knowledge or skip it.
 
 ### 2.3 Handle existing configuration
 
@@ -143,15 +147,16 @@ If the project already has `.claude/` config, follow these conflict resolution r
 
 **Never overwrite existing configuration.**
 
-### 2.4 Generate and write files
+### 2.4 Compose and write files
 
-For each item you decided to generate:
+For each item you decided to generate, compose it from scratch using the guidelines and examples in generation-guide.md as reference:
 
-1. Select the appropriate template from generation-guide.md
-2. Replace all `{{ variable }}` placeholders with project-specific values from your Phase 1 scan
-3. Write the file to the correct path in the project directory
+1. Use section 9.1 template for `CLAUDE.md` (structural — fill in placeholders with scan values)
+2. For commands, skills, and agents — compose content tailored to THIS project. Reference the examples in the guide for quality, but do not copy them verbatim. Every line should trace to a Phase 1 detection.
+3. Use section 9.5/9.6 formats for hooks and MCP (structural — exact JSON format needed)
+4. Write each file to the correct path in the project directory
 
-Ensure every generated file is immediately usable — no leftover placeholders, no TODO comments.
+Ensure every generated file is immediately usable — no leftover placeholders, no TODO comments, no generic advice.
 
 ### 2.5 Generate INSTRUCTION.md
 
