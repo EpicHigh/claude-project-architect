@@ -19,9 +19,9 @@ Scanning project...
 
 Generating configuration...
 ✓ CLAUDE.md — project overview, build/test/lint commands
-✓ 7 commands — commit, review, explain, component, page, migrate, test
-✓ 5 skills — code-conventions, project-context, design-system, schema-patterns, test-patterns
-✓ 1 agent — test-writer
+✓ 4 commands — commit, implement, fix, review
+✓ 6 skills — implement-feature, fix-bug, improve-architecture, tdd, design-system, schema-patterns
+✓ 5 agents — implementer, architect, reviewer, qa, fixer
 ✓ 1 hook — lint + test pre-commit
 ✓ 1 MCP server — Context7 for Next.js docs
 ```
@@ -31,7 +31,7 @@ Generating configuration...
 ```
 # Add the marketplace and install
 /plugin marketplace add EpicHigh/claude-project-architect
-/plugin install project-architect@epichigh-claude-project-architect
+/plugin install project-architect@EpicHigh-claude-project-architect
 ```
 
 Or install locally for development:
@@ -61,23 +61,16 @@ The plugin runs in 4 phases:
 | Layer | Output | When |
 | --- | --- | --- |
 | CLAUDE.md | Project overview, build/test/lint commands, conventions | Always |
-| Commands | `commit`, `review`, `explain` | Always |
-| Commands | `component`, `page` | Frontend framework detected |
-| Commands | `endpoint` | Backend framework detected |
-| Commands | `migrate` | Database/ORM detected |
-| Commands | `test` | Test framework detected |
-| Commands | `e2e` | E2E framework detected |
-| Commands | `docker` | Docker detected |
-| Commands | `deploy` | CI/CD detected |
-| Commands | `new-package` | Monorepo detected |
-| Skills | `code-conventions`, `project-context` | Always |
-| Skills | `design-system` | Frontend framework detected |
+| Commands | `commit`, `implement`, `fix`, `review` | Always |
+| Skills | `implement-feature`, `fix-bug`, `improve-architecture` | Always |
+| Skills | `tdd` | Test framework detected |
+| Skills | `design-system` | Styling framework detected |
 | Skills | `api-patterns` | Backend framework detected |
 | Skills | `schema-patterns` | Database/ORM detected |
-| Skills | `test-patterns` | Test framework detected |
-| Agents | `test-writer` | Test framework detected |
-| Agents | `reviewer` | CI/CD detected |
-| Agents | `refactor-agent` | Tests + linter + coverage detected |
+| Agents | `architect` | Always |
+| Agents | `reviewer` | Linter or test framework detected |
+| Agents | `implementer` | Test framework + linter detected |
+| Agents | `qa`, `fixer` | Test framework detected |
 | Hooks | lint pre-commit | Linter detected |
 | Hooks | lint + test pre-commit | Linter + fast tests detected |
 | MCP | Context7 docs server | Framework with docs detected |
@@ -142,9 +135,9 @@ references/generation-guide.md     → Templates for generated output
 
 See complete generated output for different stacks:
 
-- **[React + Next.js](examples/react-nextjs/)** — 7 commands, 5 skills, 1 agent, hooks, MCP
-- **[Go API Server](examples/go-api/)** — 5 commands, 4 skills, hooks
-- **[Python + FastAPI](examples/python-fastapi/)** — 6 commands, 5 skills, 1 agent, hooks, MCP
+- **[React + Next.js](examples/react-nextjs/)** — 4 commands, 6 skills, 5 agents, hooks, MCP
+- **[Go API Server](examples/go-api/)** — 4 commands, 6 skills, 5 agents, hooks
+- **[Python + FastAPI](examples/python-fastapi/)** — 4 commands, 6 skills, 5 agents, hooks, MCP
 
 ## Customization
 
