@@ -157,7 +157,7 @@ If the project already has `.claude/` config, follow these conflict resolution r
 
 Generate each layer in order. For each layer, compose → self-review → refine until robust before moving to the next. Each layer builds on the validated output of previous layers.
 
-Follow the Composition Process (section 9.8) and Edge Case strategies (section 9.9) throughout. Use the Self-Review Criteria (section 9.11) and Quality Validation Checklist (section 9.10) for each layer.
+Follow the Composition Process (section 9.8) and Edge Case strategies (section 9.9) throughout. Use the Self-Review Criteria (section 9.11) for per-layer review. The Quality Validation Checklist (section 9.10) runs once at the end as the final cross-layer check.
 
 #### Layer 1: CLAUDE.md (foundation)
 
