@@ -210,7 +210,17 @@ Generate hooks and MCP config using exact formats from sections 9.5/9.6. Verify:
 
 #### Layer 6: INSTRUCTION.md
 
-Generate using the template from the generation guide. Verify it accurately summarizes everything generated in Layers 1-5. Keep under 150 lines.
+Generate using the template from the generation guide. This is a quick-start onboarding guide, not documentation. If one already exists, skip this layer.
+
+Composition constraints for this layer:
+
+- Include only sections for layers that were actually generated (commands, skills, agents, hooks, MCP)
+- Fill in all project-specific values — stack names, framework versions, real command names
+- Add 3–5 tips specific to the developer's detected stack
+- Keep it under 150 lines
+- Use a friendly, conversational tone
+
+Verify it accurately summarizes everything generated in Layers 1-5.
 
 #### Final Cross-Layer Validation
 
@@ -220,14 +230,6 @@ After all layers are complete, run the full Quality Validation Checklist (sectio
 - No duplicate content across layers
 - Every generated file passes the specificity test
 - All conditional outputs match detections
-
-- Include only sections for layers that were actually generated (commands, skills, agents, hooks, MCP)
-- Fill in all project-specific values — stack names, framework versions, real command names
-- Add 3–5 tips specific to the developer's detected stack
-- Keep it under 150 lines
-- Use a friendly, conversational tone
-
-This file is a quick-start onboarding guide, not documentation. If the project already has an `INSTRUCTION.md`, skip this step.
 
 ---
 
