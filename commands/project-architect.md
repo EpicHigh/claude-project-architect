@@ -153,61 +153,73 @@ If the project already has `.claude/` config, follow these conflict resolution r
 
 **Never overwrite existing configuration.**
 
-### 2.4 Compose and write files
+### 2.4 Per-Layer Generation with Self-Review
 
-For each item you decided to generate, follow the Composition Process (section 9.8 of the generation guide):
+Generate each layer in order. For each layer, compose → self-review → refine until robust before moving to the next. Each layer builds on the validated output of previous layers.
 
-1. **Gather context** — collect relevant Phase 1 findings for this output
-2. **Identify stack intersections** — what does the developer need to know about how detected technologies interact?
-3. **Compose from scratch** — use the guidelines and examples as quality reference, not templates to copy
-4. **Validate before writing** — run the per-file checks from section 9.10
+Follow the Composition Process (section 9.8) and Edge Case strategies (section 9.9) throughout. Use the Self-Review Criteria (section 9.11) for per-layer review. The Quality Validation Checklist (section 9.10) runs once at the end as the final cross-layer check.
 
-Structural outputs use exact formats: section 9.1 template for `CLAUDE.md`, section 9.5/9.6 for hooks/MCP.
+#### Layer 1: CLAUDE.md (foundation)
 
-For edge cases (no tests, no linter, monorepo, new project), follow the fallback strategies in section 9.9.
+Compose `CLAUDE.md` using the template in section 9.1. Then review:
 
-### 2.5 Self-Review & Refine Loop
+- Does every section trace to a Phase 1 detection?
+- Are build/test/lint commands the actual commands found in Phase 1?
+- Is it under 200 lines? No generic advice?
 
-After writing all files, run an autoresearch-style review loop to ensure the generated configuration is the best it can be for THIS project. Do NOT present to the user until this loop completes.
+Refine until solid. **This file is the foundation — commands, skills, and agents will reference it.**
 
-**The loop:**
+#### Layer 2: Commands
 
-```
-READ back every generated file
-  → IDENTIFY areas of improvement and gaps
-  → REFINE (fix issues, add missing knowledge, remove generic content)
-  → VALIDATE against quality checklist (section 9.10)
-  → REPEAT if improvements were made
-  → STOP when no more improvements are found
-```
+Compose all commands (universal + conditional). Then review each command:
 
-**What to look for in each pass:**
+- Does every validation step use a real command from CLAUDE.md?
+- Are steps consistent with what CLAUDE.md documents?
+- Would a developer find this command faster than doing the steps manually?
 
-1. **Areas of Improvement:**
-   - Is there stack-intersection knowledge missing? (e.g., agent knows React but doesn't mention how React interacts with the detected ORM)
-   - Are commands referencing the right actual commands from Phase 1? (not assumed commands)
-   - Are skills teaching methodology specific to this project, or could they apply to any project?
-   - Do agents contain enough project-specific context to produce different output than they would for a different project?
+Refine until each command is project-specific and consistent with Layer 1.
 
-2. **Gaps:**
-   - Is there a detected technology with no corresponding output? (e.g., Playwright detected but no E2E-related skill or guidance)
-   - Is there a workflow the developer likely does frequently that has no command? (e.g., database migrations, deployment)
-   - Are there agent blind spots? (e.g., reviewer agent knows about the linter but not about the project's specific code patterns)
+#### Layer 3: Skills
 
-3. **Quality Issues:**
-   - Generic advice that could apply to any project → make specific or remove
-   - Inconsistencies between files (CLAUDE.md says one command, agent says another)
-   - Missing validation commands in agents/commands (detected but not referenced)
+Compose all skills (universal + conditional). Then review each skill:
 
-**Stopping criteria:** Stop when a review pass finds no areas of improvement, no gaps, and no quality issues. Typically 1-3 passes.
+- Does the skill teach methodology specific to THIS project's stack intersection?
+- Does it reference actual files, directories, and patterns from Phase 1?
+- Does it avoid duplicating CLAUDE.md content? (Skills = methodology, CLAUDE.md = facts)
 
-### 2.6 Quality validation
+Refine until each skill would produce different guidance for a different project.
 
-After the self-review loop completes, run the Quality Validation Checklist (section 9.10) one final time. Fix any remaining issues.
+#### Layer 4: Agents
 
-### 2.7 Generate INSTRUCTION.md
+Compose all agents. Then review each agent:
 
-After the final validation passes, generate an `INSTRUCTION.md` in the project root using the INSTRUCTION.md template in the generation guide.
+- Does the agent embed stack-intersection knowledge (not just individual framework docs)?
+- Does the agent's process reference actual commands from CLAUDE.md and Layer 2?
+- Is the agent consistent with skills from Layer 3? (No contradictions)
+- **Specificity test:** Remove the project name — can you still identify which stack this agent targets?
+
+Refine until each agent is genuinely stack-specific and consistent with all previous layers.
+
+#### Layer 5: Hooks + MCP
+
+Generate hooks and MCP config using exact formats from sections 9.5/9.6. Verify:
+
+- Hook commands match the lint/test commands in CLAUDE.md
+- Binary confirmed installed (Phase 1 `command -v` check)
+- MCP servers match detected frameworks
+
+#### Layer 6: INSTRUCTION.md
+
+Generate using the template from the generation guide. Verify it accurately summarizes everything generated in Layers 1-5. Keep under 150 lines.
+
+#### Final Cross-Layer Validation
+
+After all layers are complete, run the full Quality Validation Checklist (section 9.10) across all files:
+
+- No contradictions between layers (CLAUDE.md commands = actual commands = agent references)
+- No duplicate content across layers
+- Every generated file passes the specificity test
+- All conditional outputs match detections
 
 - Include only sections for layers that were actually generated (commands, skills, agents, hooks, MCP)
 - Fill in all project-specific values — stack names, framework versions, real command names
