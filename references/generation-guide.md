@@ -729,7 +729,7 @@ After completing Phase 1, use this guide to reason about what outputs would help
 
 ## 9.8 Composition Process
 
-How to compose each output. Follow this process for every command, skill, and agent you generate.
+How to compose each output. Follow this process for every file you generate. Generation happens per-layer (CLAUDE.md → Commands → Skills → Agents → Hooks/MCP → INSTRUCTION.md), with self-review after each layer before moving to the next.
 
 ### Step 1: Gather Context
 
@@ -844,7 +844,17 @@ For each generated file:
 
 ## 9.11 Self-Review Criteria
 
-After writing all files, read them back and review for these categories. Repeat until no issues remain.
+Apply after composing each layer. Read back what was written, check against these criteria, refine until no issues remain, then move to the next layer.
+
+### Per-Layer Review Focus
+
+| Layer | Key Review Questions |
+|-------|---------------------|
+| CLAUDE.md | Every section traces to Phase 1? Commands are real? Under 200 lines? |
+| Commands | Validation steps match CLAUDE.md? Steps use real commands? |
+| Skills | Methodology is project-specific? No CLAUDE.md duplication? References actual files? |
+| Agents | Stack-intersection knowledge present? Consistent with commands + skills? Passes specificity test? |
+| Hooks/MCP | Commands match CLAUDE.md? Binary confirmed installed? |
 
 ### Areas of Improvement
 
@@ -869,9 +879,18 @@ Ask for each generated file:
 - Commands with steps the project can't actually run (e.g., "run lint" when no linter detected)
 - Skills that duplicate CLAUDE.md content — skills are for methodology, CLAUDE.md is for facts
 
-### When to Stop
+### Cross-Layer Consistency (after each layer)
 
-Stop iterating when a review pass finds **zero** issues across all three categories. Typically takes 1-3 passes. Don't iterate endlessly — if the output is solid and project-specific, present it.
+Before moving to the next layer, verify consistency with completed layers:
+
+- Commands reference the same tool names as CLAUDE.md
+- Skills don't contradict command workflows
+- Agents reference commands and patterns documented in earlier layers
+- No duplicate content across layers
+
+### When to Stop (per layer)
+
+Stop refining a layer when a review pass finds **zero** issues. Typically 1-2 passes per layer. Then move to the next layer.
 
 ---
 

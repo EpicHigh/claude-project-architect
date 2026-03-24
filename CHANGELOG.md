@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-03-24
+
+### Changed
+
+- Generation now uses per-layer self-review loops instead of batch review at the end
+- Each layer (CLAUDE.md → Commands → Skills → Agents → Hooks → INSTRUCTION.md) is composed, self-reviewed, and refined to robust before moving to the next
+- Cross-layer consistency checks after each layer ensure no contradictions
+- Self-Review Criteria (section 9.11) updated with per-layer review focus table
+- Composition Process (section 9.8) updated to reflect per-layer approach
+
 ## [0.7.0] - 2026-03-24
 
 ### Changed
