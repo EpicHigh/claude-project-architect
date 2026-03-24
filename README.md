@@ -49,12 +49,11 @@ Open Claude Code in your project and run:
 /project-architect
 ```
 
-The plugin runs in 4 phases:
+The plugin runs autonomously in 3 phases:
 
 1. **Scan** — reads config files, directory structure, git history (read-only, never executes code)
-2. **Generate** — composes configuration tailored to your project's specific stack intersection
-3. **Present** — shows what was generated and why
-4. **Iterate** — refine based on your feedback
+2. **Generate** — composes configuration tailored to your project's specific stack intersection, then self-reviews and refines until no gaps remain
+3. **Present** — shows what was generated, why, and what the self-review improved
 
 ## What Gets Generated
 
@@ -131,7 +130,7 @@ project-architect is a Claude Code plugin — it's pure markdown and JSON, no ex
 
 ```
 .claude-plugin/plugin.json        → Plugin manifest
-commands/project-architect.md      → Main command (4 phases)
+commands/project-architect.md      → Main command (3 autonomous phases)
 references/detection-guide.md      → What to look for during scan
 references/generation-guide.md     → Guidelines and examples for output composition
 ```

@@ -14,14 +14,14 @@ The entire plugin is 4 files:
 
 ```
 .claude-plugin/plugin.json          Entry point — tells Claude Code this is a plugin
-commands/project-architect.md        The command — 4-phase workflow Claude follows
+commands/project-architect.md        The command — 3-phase autonomous workflow
 references/detection-guide.md        Knowledge base — what to look for during scanning
 references/generation-guide.md       Guidelines and examples — how to compose outputs
 ```
 
 **plugin.json** registers the plugin and points to the command and skill files. It's the only JSON file.
 
-**project-architect.md** is the main slash command. It contains instructions for Claude to execute in 4 phases: Scan, Generate, Present, Iterate. It references both guide files and tells Claude which tools to use (Read, Glob, Grep, Bash, Write).
+**project-architect.md** is the main slash command. It contains instructions for Claude to execute autonomously in 3 phases: Scan, Generate (with built-in self-review loop), Present. It references both guide files and tells Claude which tools to use (Read, Glob, Grep, Bash, Write).
 
 **detection-guide.md** is a structured knowledge base of ~440 lines. It contains tables mapping indicator files to technologies — "if you see `package.json` with `next` in dependencies, that's Next.js." Claude reads this during Phase 1 to know what to look for.
 
@@ -41,21 +41,20 @@ User runs /project-architect
          │ detections
          ▼
 ┌─────────────────────┐
-│  Phase 2: Generate  │  Reason about needs, compose tailored output
+│  Phase 2: Generate  │  Compose tailored output, then self-review & refine
 │                     │  Reference: generation-guide.md
-│                     │  Tools: Write
+│                     │  Tools: Read, Write, Glob, Grep
+│                     │
+│  ┌───────────────┐  │
+│  │ Self-Review   │  │  Read back → identify gaps → refine → repeat
+│  │ & Refine Loop │──│  until no improvements remain (1-3 passes)
+│  └───────────────┘  │
 └────────┬────────────┘
-         │ generated files
+         │ validated files
          ▼
 ┌─────────────────────┐
-│  Phase 3: Present   │  Show user what was generated and why
+│  Phase 3: Present   │  Show what was generated, why, and what was improved
 │                     │  No tools — just conversation
-└────────┬────────────┘
-         │ user feedback
-         ▼
-┌─────────────────────┐
-│  Phase 4: Iterate   │  Refine based on feedback
-│                     │  Tools: Read, Write
 └─────────────────────┘
 ```
 

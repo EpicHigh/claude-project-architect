@@ -16,7 +16,7 @@ project-architect is a 4-file architecture:
 
 ```
 .claude-plugin/plugin.json        → Plugin manifest (entry point)
-commands/project-architect.md      → Main slash command (4 phases: Scan → Generate → Present → Iterate)
+commands/project-architect.md      → Main slash command (3 phases: Scan → Generate+Self-Review → Present)
 references/detection-guide.md      → Tables mapping indicator files → technologies
 references/generation-guide.md     → Guidelines, examples, and quality criteria for output composition
 ```
