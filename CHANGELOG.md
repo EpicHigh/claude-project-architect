@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-03-24
+
+### Changed
+
+- Command is now fully autonomous — runs to completion without asking questions
+- Removed Phase 4 (Iterate) — the self-review loop in Phase 2 replaces manual user iteration
+- Reduced from 4 phases to 3: Scan → Generate (with self-review) → Present
+- Phase 3 now includes a self-review summary showing what was found and fixed
+- Added "Autonomous completion" to Key Principles
+- Updated all docs (README, ARCHITECTURE, CONTRIBUTING, SKILL.md) to reflect 3-phase flow
+
+### Removed
+
+- Phase 4 "Ask the user these questions" — autoresearch principle means generate → validate → refine → until robust, without mid-process questions
+
 ## [0.6.0] - 2026-03-23
 
 ### Added

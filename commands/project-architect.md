@@ -5,7 +5,7 @@ allowed-tools: Bash, Read, Write, Grep, Glob
 
 # Project Architect
 
-You are a project analysis assistant. Your job is to scan this codebase, understand its stack and conventions, then generate a complete `.claude/` configuration tailored to this project.
+You are a project analysis assistant. Your job is to scan this codebase, understand its stack and conventions, then generate a complete `.claude/` configuration tailored to this project. Run autonomously through all 3 phases — Scan, Generate (with self-review), Present — without asking questions.
 
 > **SAFETY: Do NOT execute project code, run builds, or install dependencies. Only read files.**
 
@@ -219,62 +219,54 @@ This file is a quick-start onboarding guide, not documentation. If the project a
 
 ---
 
-## Phase 3: Present and Explain
+## Phase 3: Present Results
 
-After generating all files, present a clear summary to the user.
+After the self-review loop completes and all files pass quality validation, present a clear summary.
 
 ### 3.1 List every generated file grouped by layer
-
-Organize the output as follows:
 
 1. **CLAUDE.md** — show the file path
 2. **Commands** — list each as `/command-name` with its one-line description
 3. **Skills** — list each skill name with its description
-4. **Agents** — list each with its isolation mode (worktree, separate context)
-5. **Hooks** — list each with its lifecycle event (pre-commit, etc.)
+4. **Agents** — list each with its isolation mode and what stack-specific knowledge it embeds
+5. **Hooks** — list each with its lifecycle event
 6. **MCP servers** — list each server added to `.mcp.json`
-7. **INSTRUCTION.md** — if generated, mention where to find it; if already present, mention it was preserved
+7. **INSTRUCTION.md** — mention where to find the onboarding guide
 
 ### 3.2 Explain why each was generated
 
-For every generated item, state which detection from Phase 1 triggered it. Example:
+For every generated item, state which Phase 1 detection triggered it:
 
-- `/component` command → "React detected in package.json dependencies"
-- `design-system` skill → "Tailwind CSS detected in devDependencies"
+- `developer` agent → "Next.js + Prisma + Jest detected — agent embeds RSC/Prisma intersection patterns"
+- `design-system` skill → "Tailwind CSS + shadcn/ui detected in devDependencies"
 
 ### 3.3 Flag hooks with warnings
 
-For each generated hook:
+For each generated hook, warn that it runs automatically and explain how to disable it (which entry to remove from `.claude/settings.json`).
 
-- Display a warning that it will run automatically
-- Explain exactly how to disable it (which line to remove from `.claude/settings.json`)
-- Remind the user they can review and remove any hook at any time
+### 3.4 Self-review summary
 
-### 3.4 Offer validation
+Report what the self-review loop found and fixed:
 
-Offer build or test commands the user can run manually to validate the setup. Do not execute them from this command.
+- How many review passes were needed
+- What was improved (e.g., "Added Prisma-specific patterns to developer agent", "Removed generic advice from reviewer")
+- Final state: all quality checks pass
 
----
+### 3.5 Customization note
 
-## Phase 4: Iterate
+End with:
 
-Ask the user these questions to refine the generated configuration:
+> Everything generated is yours to edit. To re-run with different settings, use `/project-architect` again — it merges with existing config, never overwrites. To add commands, skills, or agents manually, create files in `.claude/commands/`, `.claude/skills/`, or `.claude/agents/`.
 
-1. "Are there workflows I missed that you do frequently?"
-2. "Any conventions I got wrong?"
-3. "Want to move anything between command ↔ skill?"
-4. "Should I add or remove any agents or hooks?"
-
-Update the generated files based on feedback. Repeat until the user is satisfied.
+Do NOT ask questions. Do NOT prompt for feedback. The command is complete.
 
 ---
 
 ## Key Principles
 
-Keep these in mind throughout all phases:
-
 - **Detect, don't assume** — every generated line traces to a detected file
 - **Specificity over generality** — no lines that could apply to any project
+- **Autonomous completion** — generate → self-review → refine → until robust, without asking
 - **Composability** — deleting any generated file breaks nothing else
 - **Safety first for hooks** — when in doubt, don't generate the hook
 - **Less is more** — five excellent customizations > twenty generic ones

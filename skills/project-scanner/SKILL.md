@@ -18,9 +18,8 @@ You have knowledge of project analysis and Claude Code configuration generation.
 Suggest running the `/project-architect` command. It performs a full scan-and-generate workflow:
 
 1. Scans the codebase to detect languages, frameworks, tools, and conventions
-2. Generates tailored `.claude/` configuration (CLAUDE.md, commands, skills, agents, hooks)
-3. Explains what was generated and why
-4. Iterates based on user feedback
+2. Generates tailored `.claude/` configuration with built-in self-review loop (generates → reviews → refines → until robust)
+3. Presents what was generated, why, and what the self-review improved
 
 Tell the user:
 
