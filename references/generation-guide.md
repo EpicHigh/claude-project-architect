@@ -257,7 +257,7 @@ Commands are `.md` files in `.claude/commands/`. They orchestrate multi-step wor
 
 `commit`, `implement`, `fix`, `review` — these workflows apply to all projects, but their content must be tailored to the project's detected stack, commands, and conventions from Phase 1.
 
-### Consider Generating
+### Generate When Detected (mandatory)
 
 - `optimize-db` — when database/ORM detected
 - `security-audit` — when backend framework detected
@@ -357,13 +357,13 @@ Skills are `SKILL.md` files in `.claude/skills/<name>/`. They encode **methodolo
 - `fix-bug` — root cause analysis methodology (reproduce → diagnose → fix → verify → prevent)
 - `improve-architecture` — architecture improvement methodology (explore → identify → design alternatives → evaluate → recommend)
 
-### Consider Generating
+### Generate When Detected (mandatory)
 
 - `tdd` — when test framework detected
 - `design-system` — when styling framework detected
 - `api-patterns` — when backend framework detected
 - `schema-patterns` — when database/ORM detected
-- Any other skill that addresses a recurring methodology need you identified in Phase 1
+- Any additional skill that addresses a recurring methodology need identified in Phase 1
 
 ### Example: api-patterns skill for a FastAPI + SQLAlchemy project
 
@@ -588,44 +588,43 @@ MCP servers extend Claude's capabilities. Generate `.mcp.json` when relevant too
 
 ---
 
-## 9.7 Output Reasoning Guide
+## 9.7 Output Requirements
 
-After completing Phase 1, use this guide to reason about what outputs would help this specific project. This is a starting point for your reasoning, not a checklist to blindly follow.
+These are **hard requirements**, not suggestions. If a detection matches, you MUST generate the corresponding outputs. Never skip a required output — if the content feels generic, refine it until it's specific rather than deleting it.
 
-### Always Generate
+### Always Generate (every project, no exceptions)
 
 | Output | Category |
 |--------|----------|
-| CLAUDE.md | Project documentation |
+| `CLAUDE.md` | Project documentation |
+| `INSTRUCTION.md` | Onboarding guide |
 | `commit`, `implement`, `fix`, `review` | Commands |
 | `implement-feature`, `fix-bug`, `improve-architecture` | Skills |
-| `architect` agent | Agents |
+| `architect`, `product-manager`, `code-reviewer` agents | Agents |
 
-### Consider When Relevant
+### Generate When Detected (mandatory — if detection matches, GENERATE it)
 
-| When You Detect... | Consider Generating... |
-|---------------------|------------------------|
+| When You Detect... | You MUST Generate... |
+|---------------------|----------------------|
 | Styling framework | `design-system` skill |
 | Backend framework | `api-patterns` skill, `security-audit` command, `security-engineer` agent, `backend-architect` agent |
 | Database / ORM | `schema-patterns` skill, `optimize-db` command, `database-optimizer` agent |
-| Test framework | `tdd` skill, `api-tester` agent, `performance-benchmarker` agent |
+| Test framework | `tdd` skill, `api-tester` agent |
 | Test framework AND linter | `developer` agent (worktree) |
-| Frontend framework | `frontend-developer` agent, `ui-designer` agent, `accessibility-auditor` agent |
+| Frontend framework | `frontend-developer` agent |
 | Docker OR CI/CD | `devops-automator` agent |
-| Large/complex project | `sre` agent |
 | ML/AI dependencies | `ai-engineer` agent |
 | Mobile (RN/Flutter/Swift) | `mobile-app-builder` agent |
 | Linter installed | lint pre-commit hook |
 | Linter + fast tests | lint + test pre-commit hook |
 | Framework with docs | Context7 MCP server |
-| Any project | Browse [agency-agents catalog](https://github.com/msitarzewski/agency-agents) for additional relevant agents |
 
-### Reasoning, Not Lookup
+### Enforce Minimum, Reason Beyond
 
-- If the project's unique stack suggests an agent or skill not listed here, generate it.
-- If a listed item would be generic for this project (no stack-specific content to embed), skip it.
-- Prefer fewer, higher-quality outputs over many generic ones. Five excellent customizations beat twenty that could apply to any project.
-- Every generated file must contain knowledge from Phase 1. If you can't point to a specific detection that makes a line relevant, remove that line.
+- The tables above define the **minimum** outputs. Generate all that match.
+- If the project's unique stack suggests ADDITIONAL agents or skills not listed here, generate those too.
+- **Never skip a detection-triggered output.** If the content feels generic, refine it until it embeds project-specific knowledge — do not delete it.
+- Browse the [agency-agents catalog](https://github.com/msitarzewski/agency-agents) for additional agents that would benefit this project beyond the minimum.
 
 ---
 
@@ -774,14 +773,22 @@ For each generated file:
 - [ ] **Hooks use validated commands** — hook commands were confirmed installed (Phase 1 should have run `command -v`)
 - [ ] **Workflow connections present** — commands reference agents, agents reference skills, skills reference agents (per section 9.8, only for entities that were actually generated)
 
-### Completeness Checks
+### Completeness Checks (hard requirements — fail if missing)
 
-- [ ] **CLAUDE.md generated** — always required
-- [ ] **Universal commands generated** — commit, implement, fix, review
-- [ ] **Universal skills generated** — implement-feature, fix-bug, improve-architecture
-- [ ] **Architect agent generated** — always required
-- [ ] **INSTRUCTION.md generated** — unless one already exists
-- [ ] **Conditional outputs match detections** — if DB detected, schema-patterns skill exists; if tests detected, tdd skill exists; etc.
+- [ ] **CLAUDE.md generated** — always required, no exceptions
+- [ ] **INSTRUCTION.md generated** — always required (unless one already exists)
+- [ ] **Universal commands generated** — commit, implement, fix, review — all four must exist
+- [ ] **Universal skills generated** — implement-feature, fix-bug, improve-architecture — all three must exist
+- [ ] **Universal agents generated** — architect, product-manager, code-reviewer — all three must exist
+- [ ] **Detection-triggered outputs exist** — for EVERY detection in Phase 1, check the mapping in section 9.7:
+  - Frontend framework detected → frontend-developer agent EXISTS, design-system skill EXISTS
+  - Backend framework detected → backend-architect agent EXISTS, security-engineer agent EXISTS, api-patterns skill EXISTS, security-audit command EXISTS
+  - Database/ORM detected → database-optimizer agent EXISTS, schema-patterns skill EXISTS, optimize-db command EXISTS
+  - Test framework detected → api-tester agent EXISTS, tdd skill EXISTS
+  - Test + linter detected → developer agent EXISTS
+  - Docker/CI detected → devops-automator agent EXISTS
+  - Linter installed → lint pre-commit hook EXISTS
+- [ ] **No outputs deleted during self-review** — if the self-review found a file too generic, it was REFINED, not deleted
 
 ---
 
@@ -805,7 +812,7 @@ Ask for each generated file:
 
 - **Stack intersection depth:** Does this output contain knowledge about how detected technologies **interact**? A developer agent for Next.js + Prisma should know that Prisma queries belong in Server Components — not just know React and Prisma separately.
 - **Command accuracy:** Does every validation step reference commands that **actually exist** in this project? (Not assumed — verified in Phase 1)
-- **Specificity test:** If I replace the project name with "generic-app," does the content still make sense? If yes, it's too generic — add project-specific knowledge or remove.
+- **Specificity test:** If I replace the project name with "generic-app," does the content still make sense? If yes, it's too generic — **refine it until specific, do NOT delete it.**
 - **Completeness:** Is there a detected technology with no corresponding guidance? (e.g., Playwright detected but no E2E methodology in any skill)
 
 ### Gaps to Check
