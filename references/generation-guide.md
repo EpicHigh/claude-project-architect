@@ -743,10 +743,10 @@ User runs /implement command
 
 ### Connection Rules
 
-When composing each layer, build explicit connections to other layers:
+When composing each layer, build explicit connections to other layers **that were actually generated**. Only reference entities that exist — if no `developer` agent was generated, don't reference it from commands.
 
-| Layer | Should Reference |
-|-------|-----------------|
+| Layer | Should Reference (when the target exists) |
+|-------|------------------------------------------|
 | Commands | Which agent handles the same workflow in isolation (e.g., "invoke `developer` agent for worktree") |
 | Skills | Which agent(s) apply this methodology (e.g., "The `developer` agent follows this methodology") |
 | Agents | Which skill(s) inform their approach and which commands they complement (e.g., "Follows `implement-feature` skill methodology") |
