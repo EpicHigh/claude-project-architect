@@ -197,7 +197,7 @@ Agents are sourced from the [agency-agents](https://github.com/msitarzewski/agen
 
 **Step 1: Select** — Check the Output Requirements (section 9.7) against Phase 1 detections. Every agent in the "Always Generate" and "Generate When Detected" tables that matches a detection is **mandatory**. Also check the mapping table in section 9.4 for fetch URLs.
 
-**Step 2: Fetch** — For each selected agent, use WebFetch to retrieve the raw agent definition:
+**Step 2: Fetch** — You **MUST** use WebFetch for each agent individually. Do NOT skip this step. Fetch the raw agent definition:
 
 ```
 https://raw.githubusercontent.com/msitarzewski/agency-agents/main/{category}/{filename}.md
@@ -205,25 +205,30 @@ https://raw.githubusercontent.com/msitarzewski/agency-agents/main/{category}/{fi
 
 Example: `https://raw.githubusercontent.com/msitarzewski/agency-agents/main/engineering/engineering-security-engineer.md`
 
-**Step 3: Tailor** — Adapt each fetched agent to THIS project:
+Fetch each agent one by one. The fetched content is the **starting point** — it contains deep, production-quality expertise (200-400 lines per agent) that you will tailor to this project.
 
-- Keep the structure (persona, philosophy, deliverables, success metrics, communication style)
-- Replace generic expertise with project-specific stack knowledge from Phase 1
+**Step 3: Tailor** — Adapt the fetched agent content to THIS project. Keep as much of the original depth as possible:
+
+- Keep the full structure and all sections from the original (persona, philosophy, deliverables, success metrics, communication style, and any additional sections)
+- Replace generic framework references with project-specific stack knowledge from Phase 1
 - Add actual file paths, commands, patterns found during scan
 - Adjust success metrics to match the project's actual tools
 - Add workflow connections to commands and skills from Layers 2-3
+- The tailored agent should be **at least 80 lines** — agency-agents originals are 200-400 lines, so your tailored version should preserve most of that depth
 
 **Step 4: Self-review** — For each tailored agent:
 
 - Does it embed stack-intersection knowledge (not just the original generic content)?
 - Does the process reference actual commands from CLAUDE.md and Layer 2?
 - Is it consistent with skills from Layer 3?
+- **Depth check:** Is the agent at least 80 lines with all 7 sections? If not, add more project-specific knowledge.
+- **Stack Expertise longest:** Is the Stack Expertise section the longest section in the agent? This is where project-specific knowledge lives.
 - **Specificity test:** Remove the project name — can you still identify which stack this targets?
 - **Connection check:** Does it reference which skill(s) it follows and which command(s) it complements? (See section 9.8)
 
-Refine until each agent is genuinely stack-specific and connected to all previous layers.
+Refine until each agent is genuinely stack-specific, deeply knowledgeable, and connected to all previous layers.
 
-**Note:** If WebFetch is unavailable or fails, compose agents from scratch using the structure and principles in section 9.4 of the generation guide as reference.
+**Fallback:** Only if WebFetch returns an actual error after attempting the fetch, compose from scratch using section 9.4 guidelines. Do NOT use the fallback to save tokens — the fetch step is mandatory.
 
 #### Layer 5: Hooks + MCP
 
