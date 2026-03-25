@@ -222,6 +222,7 @@ Fetch each agent one by one. The fetched content is the **starting point** — i
 - Does the process reference actual commands from CLAUDE.md and Layer 2?
 - Is it consistent with skills from Layer 3?
 - **Depth check:** Is the agent at least 80 lines with all 7 sections? If not, add more project-specific knowledge.
+- **Stack Expertise longest:** Is the Stack Expertise section the longest section in the agent? This is where project-specific knowledge lives.
 - **Specificity test:** Remove the project name — can you still identify which stack this targets?
 - **Connection check:** Does it reference which skill(s) it follows and which command(s) it complements? (See section 9.8)
 
