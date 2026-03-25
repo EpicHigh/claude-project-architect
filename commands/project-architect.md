@@ -123,22 +123,23 @@ Using your scan findings from Phase 1, generate a tailored `.claude/` configurat
 
 Read `PLUGIN_DIR/references/generation-guide.md` for guidelines on what good outputs look like. It contains principles, quality criteria, and examples from different stacks — use these as reference for quality, not as templates to fill.
 
-### 2.2 Reason about what to generate
+### 2.2 Determine what to generate
 
-Based on your Phase 1 findings, reason about what commands, skills, and agents would genuinely help a developer working on THIS project. Consider the unique intersection of technologies — a Next.js + Prisma project needs different agents than a Next.js + Mongoose project.
+Based on your Phase 1 findings, determine what to generate. The Output Requirements (section 9.7) define **mandatory outputs** — if a detection matches, the corresponding output MUST be generated. Then add anything extra this specific project needs beyond the minimum.
 
-Use the Output Reasoning Guide (section 9.7) as a starting point, not a checklist:
+Follow the Output Requirements (section 9.7) — these are **hard requirements, not suggestions**:
 
 | Layer | Rule |
 |-------|------|
 | `CLAUDE.md` | **Always generate** using the template in section 9.1. Under 200 lines. Every line must be project-specific. |
-| Commands | **Always generate** commit, implement, fix, review. **Consider** additional commands (optimize-db, security-audit) based on detections. Compose each using your scan results — see section 9.2 for guidelines and examples. |
-| Skills | **Always generate** implement-feature, fix-bug, improve-architecture. **Consider** additional skills based on detections. Compose each with project-specific methodology — see section 9.3 for guidelines. |
-| Agents | **Reason about** which agents would embed useful stack-specific knowledge. Always generate `architect`. Consider others based on detections. Each agent must contain knowledge specific to THIS project's stack intersection — see section 9.4 for guidelines and examples. |
+| `INSTRUCTION.md` | **Always generate** using the template in section 9.13. Under 150 lines. |
+| Commands | **Always generate** commit, implement, fix, review. **Generate when detected** (mandatory): optimize-db (DB/ORM), security-audit (backend). See section 9.2. |
+| Skills | **Always generate** implement-feature, fix-bug, improve-architecture. **Generate when detected** (mandatory): tdd (tests), design-system (styling), api-patterns (backend), schema-patterns (DB/ORM). See section 9.3. |
+| Agents | **Always generate** architect, product-manager, code-reviewer. **Generate when detected** (mandatory, not optional): see section 9.7 for full mapping. Fetch from agency-agents and tailor — see section 9.4. |
 | Hooks | Generate **only** when ALL 3 conditions are true: (1) tool binary confirmed installed via `command -v`, (2) command runs in under 30 seconds, (3) hook includes a disable comment. Use the exact format in section 9.5. |
-| `.mcp.json` | Generate only when frameworks detected benefit from MCP servers. Use the exact format in section 9.6. |
+| `.mcp.json` | Generate when frameworks detected benefit from MCP servers. Use the exact format in section 9.6. |
 
-**Quality bar:** Prefer fewer, higher-quality outputs over many generic ones. For each file you generate, ask: "What does this contain that is specific to THIS project?" If the answer is nothing beyond the project name, either add project-specific knowledge or skip it.
+**Quality bar:** Every generated file must contain project-specific knowledge. If content feels generic, **refine it until it's specific** — do NOT skip or delete it. The minimum set in section 9.7 is mandatory.
 
 ### 2.3 Handle existing configuration
 
@@ -194,7 +195,7 @@ Refine until each skill is project-specific and connected to Layers 1-2.
 
 Agents are sourced from the [agency-agents](https://github.com/msitarzewski/agency-agents) repository and tailored to this project. Follow this process:
 
-**Step 1: Select** — Based on Phase 1 detections, decide which agents this project needs. See section 9.4 of the generation guide for the detection → agent mapping table.
+**Step 1: Select** — Check the Output Requirements (section 9.7) against Phase 1 detections. Every agent in the "Always Generate" and "Generate When Detected" tables that matches a detection is **mandatory**. Also check the mapping table in section 9.4 for fetch URLs.
 
 **Step 2: Fetch** — For each selected agent, use WebFetch to retrieve the raw agent definition:
 

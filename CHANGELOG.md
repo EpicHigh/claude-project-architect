@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-03-25
+
+### Fixed
+
+- **Generation quality regression** — v1.0.0 produced minimal output (1 agent, 0 skills, no CLAUDE.md) because guidance was too permissive
+- Changed "Consider generating" → "Generate When Detected (mandatory)" in section 9.7
+- Changed "Reason about" → "Always generate + Generate when detected" for agents in Phase 2.2
+- Added 3 universal agents (architect, product-manager, code-reviewer) to "Always Generate"
+- Quality validation now has hard completeness checks: every detection-triggered output must exist
+- Self-review now says "refine until specific" instead of "skip if generic" — outputs are refined, never deleted
+- Layer 4 Step 1 now enforces mandatory agent selection from section 9.7
+
+### Changed
+
+- Section 9.7 renamed from "Output Reasoning Guide" to "Output Requirements"
+- Philosophy shifted from "it's okay to skip" to "enforce minimum, reason beyond"
+
 ## [1.0.0] - 2026-03-25
 
 ### Added
