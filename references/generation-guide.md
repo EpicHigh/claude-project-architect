@@ -508,9 +508,9 @@ When you fetch an agent from agency-agents, adapt it:
 | `allowed-tools` | Yes | Comma-separated tool list |
 | `isolation` | No | `worktree` for agents that write code |
 
-### Fallback
+### Fallback (only when WebFetch actually fails)
 
-If WebFetch is unavailable or fails, compose agents from scratch following the 7-section structure above. Use the principles and quality criteria as your guide. The structure matters more than the source.
+Only if WebFetch returns an error after you attempt the fetch, compose agents from scratch following the 7-section structure above. You must still meet the minimum 80-line depth and all quality criteria. Do NOT use this fallback to save tokens — always attempt WebFetch first.
 
 ---
 
