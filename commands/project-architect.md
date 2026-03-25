@@ -1,6 +1,6 @@
 ---
 description: Analyze your codebase and generate Claude Code configuration (CLAUDE.md, commands, skills, agents, hooks)
-allowed-tools: Bash, Read, Write, Grep, Glob
+allowed-tools: Bash, Read, Write, Edit, Grep, Glob
 ---
 
 # Project Architect
@@ -158,7 +158,7 @@ If the project already has `.claude/` config, follow these conflict resolution r
 
 Generate each layer in order. For each layer, compose → self-review → refine until robust before moving to the next. Each layer builds on the validated output of previous layers.
 
-Follow the Composition Process (section 9.9), Workflow Connections (section 9.8), and Edge Case strategies (section 9.10) throughout. Use the Self-Review Criteria (section 9.12) for per-layer review. The Quality Validation Checklist (section 9.11) runs once at the end as the final cross-layer check.
+Follow the Composition Process (section 9.9), Workflow Connections (section 9.8), and Edge Case strategies (section 9.10) throughout. Use the Self-Review Criteria (section 9.12) for per-layer review. After all layers are complete, the Holistic Self-Improvement Loop runs the Quality Validation Checklist (section 9.11) and the Scoring Rubric (section 9.14) as the final cross-layer check.
 
 #### Layer 1: CLAUDE.md (foundation)
 
@@ -270,21 +270,71 @@ Composition constraints for this layer:
 
 Verify it accurately summarizes everything generated in Layers 1-5.
 
-#### Final Cross-Layer Validation
+#### Holistic Self-Improvement Loop
 
-After all layers are complete, run the full Quality Validation Checklist (section 9.11) across all files:
+All layers are now composed with per-layer self-review complete. Before presenting results, evaluate all generated outputs **as a holistic system** and iteratively improve them until they meet quality thresholds. Reference the Self-Improvement Scoring Rubric (section 9.14 of the generation guide) for the 10 evaluation dimensions and their scoring criteria.
 
-- No contradictions between layers (CLAUDE.md commands = actual commands = agent references)
-- No duplicate content across layers
-- Every generated file passes the specificity test
-- All conditional outputs match detections
-- **Workflow connections verified:** commands reference agents, agents reference skills, skills reference agents, hooks use CLAUDE.md commands (see section 9.8)
+**For each iteration (max 5 rounds), follow this procedure:**
+
+**Step 1: Sleep trigger** — Execute this Bash command to create a forced evaluation breakpoint:
+
+```bash
+sleep 5 && echo "=== SELF-IMPROVEMENT CHECKPOINT (round N/5) ==="
+```
+
+Replace `N` with the current round number. After seeing the echo output, switch from generation mode to **critical evaluation mode**. Do NOT treat this as a continuation of generation — you are now an evaluator, not a creator.
+
+**Step 2: Read back ALL generated files** — Use the Read tool to re-read every file written during Phase 2. This is mandatory — do NOT rely on memory of what you wrote. Memory is unreliable after generating 20+ files.
+
+**Step 3: Score all 10 dimensions** — Using the rubric in section 9.14, evaluate each dimension with a score from 0–10. For each dimension, perform the specified **verification action** (reading files, counting lines, comparing values). Record the score and a brief note explaining the rating.
+
+Present the current round's scores in a table:
+
+```
+Round N scores:
+| # | Dimension            | Score | Notes                          |
+|---|----------------------|-------|--------------------------------|
+| 1 | Completeness         | ?/10  | ...                            |
+| 2 | Specificity          | ?/10  | ...                            |
+| 3 | Accuracy             | ?/10  | ...                            |
+| 4 | Cross-layer Consistency | ?/10 | ...                           |
+| 5 | Depth                | ?/10  | ...                            |
+| 6 | Coverage             | ?/10  | ...                            |
+| 7 | Non-redundancy       | ?/10  | ...                            |
+| 8 | Actionability        | ?/10  | ...                            |
+| 9 | Safety               | ?/10  | ...                            |
+| 10| Freshness            | ?/10  | ...                            |
+```
+
+**Step 4: Check stop conditions** — Stop the loop if ANY of these are true:
+
+- **Threshold met:** All 10 dimensions score ≥ 8
+- **Stalled:** Two consecutive rounds where no dimension's score improved
+- **Max iterations:** Round 5 reached
+
+Record the convergence reason for the Phase 3 score card.
+
+**Step 5: Fix all failing dimensions** — If not stopping, use the Edit tool to fix issues for **every** dimension scoring below 8. Batch all fixes in a single round before re-evaluating. Do NOT fix one dimension and re-score — fix them all, then loop back to Step 1.
+
+**What to track across rounds:**
+
+- Running score card (dimension × round → score)
+- What was changed in each round (brief description per fix)
+- Convergence reason when the loop ends
+
+**Critical instructions:**
+
+- Do NOT skip the sleep trigger — it is the mechanism that forces a genuine evaluation pause
+- Do NOT score dimensions without reading the actual files — memory is unreliable after generating many files
+- Do NOT delete files that score low — refine them until they score ≥ 8
+- If a dimension is stuck below 8 for 2 consecutive rounds, note it as a known limitation and move on
+- Reference the Quality Validation Checklist (section 9.11) as the source of truth for pass/fail criteria within each dimension
 
 ---
 
 ## Phase 3: Present Results
 
-After the self-review loop completes and all files pass quality validation, present a clear summary.
+After the Self-Improvement Loop completes and all files pass quality validation, present a clear summary.
 
 ### 3.1 List every generated file grouped by layer
 
@@ -307,13 +357,34 @@ For every generated item, state which Phase 1 detection triggered it:
 
 For each generated hook, warn that it runs automatically and explain how to disable it (which entry to remove from `.claude/settings.json`).
 
-### 3.4 Self-review summary
+### 3.4 Quality Score Card
 
-Report what the self-review loop found and fixed:
+Present the final score card from the Holistic Self-Improvement Loop as a markdown table:
 
-- How many review passes were needed
-- What was improved (e.g., "Added Prisma-specific patterns to developer agent", "Removed generic advice from reviewer")
-- Final state: all quality checks pass
+```
+### Quality Score Card
+
+| # | Dimension              | Score | Notes                              |
+|---|------------------------|-------|------------------------------------|
+| 1 | Completeness           | ?/10  | ...                                |
+| 2 | Specificity            | ?/10  | ...                                |
+| 3 | Accuracy               | ?/10  | ...                                |
+| 4 | Cross-layer Consistency | ?/10 | ...                                |
+| 5 | Depth                  | ?/10  | ...                                |
+| 6 | Coverage               | ?/10  | ...                                |
+| 7 | Non-redundancy         | ?/10  | ...                                |
+| 8 | Actionability          | ?/10  | ...                                |
+| 9 | Safety                 | ?/10  | ...                                |
+| 10| Freshness              | ?/10  | ...                                |
+|   | **Total**              | **?/100** | **Converged in N round(s)** |
+```
+
+Include after the table:
+
+- **Rounds completed:** How many self-improvement rounds ran
+- **Improvements per round:** Brief bullet list of what was fixed in each round (e.g., "Round 1: Added Prisma intersection knowledge to developer agent, fixed lint command in review command")
+- **Convergence reason:** Why the loop stopped (all dimensions ≥ 8 / no improvement for 2 rounds / max 5 rounds reached)
+- **Known limitations:** Any dimensions that remained below 8 despite improvement attempts
 
 ### 3.5 Customization note
 

@@ -1426,3 +1426,174 @@ External tools are now available to Claude through MCP:
 - Review hooks in `.claude/settings.json` — remove any you don't want
 {{ end }}
 `````
+
+---
+
+## 9.14 Self-Improvement Scoring Rubric
+
+Quantitative evaluation of all generated outputs as a holistic system. Used during the Holistic Self-Improvement Loop at the end of Phase 2 (after all per-layer self-reviews are complete).
+
+**Rules:**
+
+- Each dimension is scored 0–10. Passing threshold is **8/10 per dimension**.
+- Scores must be based on **verification actions** (reading files, counting lines, comparing values) — not impressions.
+- If a dimension cannot be evaluated (e.g., no hooks generated → Safety is N/A), score it 10 and note "N/A — not applicable."
+
+---
+
+### Dimension 1: Completeness
+
+**Definition:** All mandatory outputs from section 9.7 are generated. No required file is missing.
+
+**Verification action:** Check every row in the "Always Generate" table and every matching row in "Generate When Detected" table. Count missing outputs.
+
+| Score | Criteria |
+|-------|----------|
+| 0 | More than half of mandatory outputs missing |
+| 5 | All universal outputs present (CLAUDE.md, 4 commands, 3 skills, 3 agents), but some detection-triggered outputs missing |
+| 10 | Every mandatory output from section 9.7 is present, including all detection-triggered ones |
+
+---
+
+### Dimension 2: Specificity
+
+**Definition:** Every line in every generated file traces to a Phase 1 detection. No generic advice.
+
+**Verification action:** For each generated file, read 5 random content lines. For each, identify which Phase 1 detection it traces to. If a line could appear unchanged in any project's config, it fails.
+
+| Score | Criteria |
+|-------|----------|
+| 0 | Most content is generic framework documentation or boilerplate |
+| 5 | Mix of specific and generic — some lines trace to detections, some are filler |
+| 10 | Every content line traces to a specific detection. Removing the project name still identifies the stack. |
+
+---
+
+### Dimension 3: Accuracy
+
+**Definition:** Commands are real, file paths exist, versions match detected values.
+
+**Verification action:** For every shell command in generated files (lint, test, build, dev), verify it matches what Phase 1 found. For file paths referenced in skills/agents, verify they were seen during scanning.
+
+| Score | Criteria |
+|-------|----------|
+| 0 | Multiple commands reference tools not installed or use wrong syntax |
+| 5 | Core commands (build, test, lint) are correct but some secondary references are wrong or assumed |
+| 10 | Every command, path, and version reference is verified against Phase 1 findings |
+
+---
+
+### Dimension 4: Cross-layer Consistency
+
+**Definition:** No contradictions between layers. Workflow connections verified per section 9.8.
+
+**Verification action:** Check that the lint command in CLAUDE.md = the hook lint command = the lint steps in commands = the lint references in agents. Repeat for test and build commands. Then verify workflow connections: commands reference agents, agents reference skills, skills reference agents.
+
+| Score | Criteria |
+|-------|----------|
+| 0 | Multiple contradictions — different commands for the same action in different files |
+| 5 | Commands are consistent but workflow connections (section 9.8) are missing or broken |
+| 10 | Zero contradictions AND all workflow connections from section 9.8 are present and correct |
+
+---
+
+### Dimension 5: Depth
+
+**Definition:** Agents are at least 80 lines with all 7 required sections. Skills teach methodology, not surface-level advice.
+
+**Verification action:** For each agent, count lines and verify all 7 sections exist. Verify Stack Expertise is the longest section. For each skill, verify it teaches methodology specific to the project's stack intersection (not just "follow best practices").
+
+| Score | Criteria |
+|-------|----------|
+| 0 | Agents are stubs (under 40 lines) or missing sections; skills are generic |
+| 5 | Agents meet minimum length but Stack Expertise is thin or generic; skills have some project-specific content |
+| 10 | All agents 80+ lines, all 7 sections present, Stack Expertise is the longest section with project-specific patterns. Skills teach deep methodology for the detected stack intersection. |
+
+---
+
+### Dimension 6: Coverage
+
+**Definition:** All stack intersections are captured. No missing tech-pair knowledge.
+
+**Verification action:** List all meaningful 2-way technology pairs from Phase 1 detections (e.g., Next.js+Prisma, React+Tailwind, Jest+React). For each pair, verify at least one generated file contains intersection knowledge about how they work together.
+
+| Score | Criteria |
+|-------|----------|
+| 0 | Technologies treated in isolation — no intersection knowledge anywhere |
+| 5 | Major intersections covered (e.g., framework+ORM) but minor ones missing (e.g., testing+framework) |
+| 10 | Every meaningful technology pair has intersection knowledge in at least one generated file |
+
+---
+
+### Dimension 7: Non-redundancy
+
+**Definition:** No duplicate content across layers. Each layer has a distinct role: CLAUDE.md = facts, skills = methodology, agents = persona + deep expertise.
+
+**Verification action:** For each skill, check if any paragraph duplicates content from CLAUDE.md. For each agent, check if Stack Expertise repeats a skill's methodology verbatim. Flag any content that appears in more than one layer.
+
+| Score | Criteria |
+|-------|----------|
+| 0 | Extensive copy-paste across layers — same paragraphs appear in multiple files |
+| 5 | Some thematic overlap but no verbatim duplication; layer roles partially blurred |
+| 10 | Zero content duplication. Each file adds unique value. Clear separation: facts → methodology → deep expertise. |
+
+---
+
+### Dimension 8: Actionability
+
+**Definition:** A new developer can immediately use the generated config. Commands are runnable. Skills activate on natural queries. INSTRUCTION.md is a useful onboarding guide.
+
+**Verification action:** Read INSTRUCTION.md — does it list all generated outputs with correct invocation examples? Read each command — are steps concrete and executable (not vague)? Read each skill description — does it contain natural-language triggers matching how a developer would phrase a request?
+
+| Score | Criteria |
+|-------|----------|
+| 0 | INSTRUCTION.md is a placeholder or missing. Commands have vague steps like "validate the code." |
+| 5 | INSTRUCTION.md is present and accurate but missing some outputs. Commands work but some steps lack specificity. |
+| 10 | INSTRUCTION.md perfectly summarizes all outputs with working examples. Every command has concrete, executable steps. Every skill has natural activation triggers. |
+
+---
+
+### Dimension 9: Safety
+
+**Definition:** Hooks meet all 3 safety conditions. No destructive defaults. No secrets in generated files.
+
+**Verification action:** For each hook: (1) binary was confirmed installed via `command -v` in Phase 1, (2) command runs in under 30 seconds, (3) disable comment is present in the hook definition. Scan all generated files for `.env` contents or hardcoded secret values.
+
+| Score | Criteria |
+|-------|----------|
+| 0 | Hooks generated without verifying binary installed, or secrets present in output |
+| 5 | Hooks mostly safe but missing disable comments or one condition unchecked |
+| 10 | Every hook passes all 3 conditions. No destructive commands. No secrets. Every hook has a disable comment. |
+
+---
+
+### Dimension 10: Freshness
+
+**Definition:** Patterns and references match the actual project state, not stale assumptions or generic framework defaults.
+
+**Verification action:** Pick 3 specific references from generated files (a directory path, a framework version, a script name). Verify each against Phase 1 scan results. Check that no reference assumes a default that differs from what was actually detected.
+
+| Score | Criteria |
+|-------|----------|
+| 0 | References outdated patterns, directories that don't exist, or assumed framework defaults |
+| 5 | Most references are current but some assume defaults rather than using detected values |
+| 10 | Every reference matches the actual project state as scanned in Phase 1 |
+
+---
+
+### Quick-Reference Checklist
+
+Use this table during each scoring round:
+
+| # | Dimension | Verify by | Pass (≥8)? |
+|---|-----------|-----------|------------|
+| 1 | Completeness | Count outputs vs 9.7 tables | |
+| 2 | Specificity | Sample 5 lines per file → trace to detections | |
+| 3 | Accuracy | Compare commands/paths to Phase 1 | |
+| 4 | Cross-layer Consistency | Match commands across layers + check 9.8 connections | |
+| 5 | Depth | Count agent lines + check 7 sections + Stack Expertise length | |
+| 6 | Coverage | List tech pairs → find intersection knowledge | |
+| 7 | Non-redundancy | Check for duplicated content across layers | |
+| 8 | Actionability | Read INSTRUCTION.md + command steps + skill triggers | |
+| 9 | Safety | Verify hook conditions + scan for secrets | |
+| 10 | Freshness | Spot-check 3 references against Phase 1 | |
