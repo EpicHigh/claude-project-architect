@@ -489,7 +489,10 @@ When you fetch an agent from agency-agents, adapt it:
 
 ### Quality Criteria
 
-- [ ] Agent has all 7 required sections
+- [ ] Agent was **fetched from agency-agents via WebFetch** (not composed from scratch unless fetch failed)
+- [ ] Agent has **all 7 required sections** — if the fetched original has additional sections, keep them
+- [ ] Agent is **at least 80 lines** — agency-agents originals are 200-400 lines; tailored versions must preserve substantial depth
+- [ ] **Stack Expertise is the longest section** — this is where project-specific knowledge lives (at least 5 project-specific bullet points)
 - [ ] Stack expertise references specific files, directories, and patterns from Phase 1
 - [ ] Process uses the project's actual commands (not generic)
 - [ ] Success metrics are measurable with the project's actual tools
@@ -764,6 +767,8 @@ For each generated file:
 - [ ] **Stack-specific content** — contains knowledge unique to this project's technology combination
 - [ ] **Correct file path** — placed in the right directory (`.claude/commands/`, `.claude/skills/<name>/`, `.claude/agents/`)
 - [ ] **Valid frontmatter** — YAML frontmatter has all required fields
+- [ ] **Agent depth check** — each agent file is at least 80 lines with all 7 required sections
+- [ ] **Agent source check** — agents were fetched from agency-agents via WebFetch (not composed from scratch unless fetch failed)
 
 ### Cross-File Checks
 

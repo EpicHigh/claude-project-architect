@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-03-25
+
+### Fixed
+
+- **Agents not fetched from agency-agents** — Claude skipped WebFetch and used fallback (compose from scratch) because fallback was too easy. Now: "You MUST use WebFetch for each agent. Do NOT skip the fetch step."
+- **Agents too shallow** — 50-69 lines vs agency-agents originals at 200-400 lines. Added minimum 80 lines per agent requirement.
+
+### Added
+
+- Agent depth validation: at least 80 lines, all 7 sections, Stack Expertise must be the longest section
+- Agent source validation: agents must be fetched from agency-agents via WebFetch
+- Explicit "Do NOT use fallback to save tokens" instruction
+- "Fetch each agent one by one" instruction to prevent batching/skipping
+
 ## [1.1.0] - 2026-03-25
 
 ### Fixed
