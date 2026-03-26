@@ -773,6 +773,7 @@ Use this table as a starting point for agent selection. **No agent is mandatory*
 | Any project with docs needs | Technical Writer | `engineering/engineering-technical-writer.md` |
 
 **Selection guidance:**
+
 - A small single-purpose library may need only 1-2 agents (e.g., code-reviewer)
 - A full-stack app typically benefits from 4-7 agents
 - A large monorepo with multiple teams may warrant 7+ agents
@@ -1123,6 +1124,7 @@ These are **hard requirements**, not suggestions. If a detection matches, you MU
 **No agents are mandatory.** Select agents based on Phase 1 scan results combined with your judgment about what the project actually needs. Use the Detection → Agent Mapping table in section 9.4 as recommendations — add or skip agents as the project context warrants.
 
 **Guidance:**
+
 - A small library or config-only repo may need 0-2 agents
 - A typical web app benefits from 3-5 agents
 - A large monorepo or complex system may warrant 5-8+ agents
