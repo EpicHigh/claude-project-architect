@@ -774,9 +774,9 @@ Use this table as a starting point for agent selection. **No agent is mandatory*
 
 **Selection guidance:**
 
-- A small single-purpose library may need only 1-2 agents (e.g., code-reviewer)
-- A full-stack app typically benefits from 4-7 agents
-- A large monorepo with multiple teams may warrant 7+ agents
+- A small single-purpose library may need only 0-2 agents (e.g., code-reviewer)
+- A full-stack app typically benefits from 3-5 agents
+- A large monorepo with multiple teams may warrant 5-8+ agents
 - If zero agents are appropriate (e.g., trivial config-only repo), justify in Phase 3
 
 This is a starting point. If the project's unique characteristics suggest an agent not listed here, browse the catalog below for the correct filename.
