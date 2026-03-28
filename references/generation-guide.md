@@ -432,7 +432,7 @@ Document rationalization patterns — how agents skip steps and why it matters.
 
 - **Vertical slices** — each increment cuts through ALL layers end-to-end (schema → API → UI → tests), not horizontal layers. Independently demoable.
 - **Agent dispatch by name** — "Dispatch `developer` agent with complete task description." Use exact agent names from `.claude/agents/`.
-- **Review-fix loop** — dispatch reviewer → fix issues → re-review → repeat until zero issues remain.
+- **Review-fix loop** — dispatch reviewer → fix issues → re-review → repeat until zero issues remain. An "issue" is any finding the reviewer flags as requiring a code change — correctness bugs, security vulnerabilities, missing error handling, pattern violations, or logic errors. Style nits and subjective suggestions that don't affect correctness are NOT issues (the reviewer should note them but they don't block the loop from exiting). The loop exits when the reviewer reports zero actionable findings.
 - **Verification gates** — explicit checkpoints between phases.
 - **User validation checkpoints** — present plan to user before proceeding. Resolve decision dependencies one-by-one.
 - **Common Mistakes section** — anti-rationalization. Document how agents shortcut or skip steps.
