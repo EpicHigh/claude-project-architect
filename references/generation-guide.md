@@ -1435,8 +1435,8 @@ Quantitative evaluation of all generated outputs as a holistic system. Used duri
 
 | Score | Criteria |
 |-------|----------|
-| 0 | Multiple contradictions — different commands for the same action in different files |
-| 5 | Commands are consistent but workflow connections (section 9.8) are missing or broken |
+| 0 | Multiple contradictions — different tool references for the same action in different files |
+| 5 | Tool references are consistent but workflow connections (section 9.8) are missing or broken |
 | 10 | Zero contradictions AND all workflow connections from section 9.8 are present and correct |
 
 ---

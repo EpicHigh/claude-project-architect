@@ -134,7 +134,7 @@ Follow the Output Requirements (section 9.7) — these are **hard requirements, 
 | `CLAUDE.md` | **Always generate** using the template in section 9.1. Under 200 lines. Every line must be project-specific. |
 | `INSTRUCTION.md` | **Always generate** using the template in section 9.13. Under 150 lines. |
 | Methodology skills | **Always generate** implement-feature, fix-bug, improve-architecture. **Generate when detected** (mandatory): tdd (tests), design-system (styling), api-patterns (backend), schema-patterns (DB/ORM). See section 9.2. |
-| Workflow skills | **No mandatory workflow skills.** Select by detection + judgment. Use the catalog in section 9.3 as recommendations. If zero workflow skills are appropriate, justify in Phase 3. |
+| Workflow skills | **No mandatory workflow skills.** Select by detection + judgment. Use the catalog in section 9.2.2 as recommendations. If zero workflow skills are appropriate, justify in Phase 3. |
 | Invocable skills | **Always generate** commit. **Conditional:** review (if git detected), others by judgment. See section 9.2. |
 | Agents | **No mandatory agents.** Select agents that fit the project based on scan results + judgment. Use the Detection → Agent Mapping in section 9.4 as recommendations. Fetch from agency-agents and tailor — see section 9.4. If zero agents are appropriate, justify in Phase 3. |
 | Hooks | Generate **only** when ALL 3 conditions are true: (1) tool binary confirmed installed via `command -v`, (2) command runs in under 30 seconds, (3) hook includes a disable comment. Use the exact format in section 9.5. |
