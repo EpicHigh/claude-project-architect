@@ -461,10 +461,13 @@ Model selects which workflow skills to generate based on scan results + judgment
 
 - [ ] Phases are sequential with verification gates
 - [ ] Agent dispatch table present with exact agent names
-- [ ] Common Mistakes section documents rationalization patterns
+- [ ] Agent dispatch descriptions include project-specific context (e.g., "Dispatch `developer` agent to implement Mongoose schema + singleton service + API route with RBAC" — not just "Dispatch `developer` agent to implement")
+- [ ] Common Mistakes section documents rationalization patterns specific to this project's stack
 - [ ] Workflow skills dispatch only agents that are actually generated in Layer 3
-- [ ] Vertical slices used (not horizontal layers) where applicable
+- [ ] Vertical slices use the project's actual layers (e.g., "schema → service → API route → UI component" for a Next.js + MongoDB project, not generic "model → controller → view")
 - [ ] User validation checkpoints before irreversible steps
+- [ ] At least 2 Input/Output examples from the actual project (same requirement as methodology skills)
+- [ ] References actual files, directories, and patterns from Phase 1
 
 #### Example: feature-development workflow skill
 
