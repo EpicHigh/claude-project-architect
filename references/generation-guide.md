@@ -432,7 +432,7 @@ Document rationalization patterns — how agents skip steps and why it matters.
 
 - **Vertical slices** — each increment cuts through ALL layers end-to-end (schema → API → UI → tests), not horizontal layers. Independently demoable.
 - **Agent dispatch by name** — "Dispatch `developer` agent with complete task description." Use exact agent names from `.claude/agents/`.
-- **Review-fix loop** — dispatch reviewer → fix issues → re-review → repeat until zero issues remain. An "issue" is any finding the reviewer flags as requiring a code change — correctness bugs, security vulnerabilities, missing error handling, pattern violations, or logic errors. Style nits and subjective suggestions that don't affect correctness are NOT issues (the reviewer should note them but they don't block the loop from exiting). The loop exits when the reviewer reports zero actionable findings.
+- **Review-fix loop** — dispatch reviewer → fix issues → re-review → repeat until zero issues remain. The reviewer checks **spec compliance first** (does implementation match the plan?) before checking code quality — spec drift caught late is expensive to fix. An "issue" is any finding requiring a code change — correctness bugs, security vulnerabilities, missing error handling, pattern violations, spec mismatches, or logic errors. Style nits and subjective suggestions that don't affect correctness are NOT issues (the reviewer should note them but they don't block the loop from exiting). The loop exits when the reviewer reports zero actionable findings.
 - **Verification gates** — explicit checkpoints between phases.
 - **User validation checkpoints** — present plan to user before proceeding. Resolve decision dependencies one-by-one.
 - **Common Mistakes section** — anti-rationalization. Document how agents shortcut or skip steps.
@@ -512,9 +512,10 @@ For each vertical slice:
 ### Phase 3: Review-Fix Loop (dispatch code-reviewer agent)
 
 - Dispatch `code-reviewer` agent on all changes
+- Reviewer checks spec compliance first (does it match the plan?), then code quality
 - If issues found → dispatch `developer` agent to fix
 - Re-dispatch `code-reviewer` agent to verify fixes
-- Repeat until zero issues remain
+- Repeat until zero actionable issues remain
 
 ### Phase 4: Finalize
 
