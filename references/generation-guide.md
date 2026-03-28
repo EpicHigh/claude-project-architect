@@ -863,7 +863,7 @@ When you fetch an agent from agency-agents, adapt it:
 2. **Replace:** Generic framework advice → project-specific stack-intersection knowledge from Phase 1
 3. **Add:** Actual file paths, directories, commands, patterns found during scan
 4. **Add:** Success metrics using the project's real tools (not generic "run tests" — specific `npm test` or `go test ./...`)
-5. **Add:** Workflow connections to commands and skills from Layers 2-3
+5. **Add:** Workflow connections to skills from Layer 2 (methodology skills it follows, workflow skills that dispatch it)
 6. **Remove:** Any content that doesn't apply to this project's detected stack
 
 ### Quality Criteria
@@ -876,7 +876,7 @@ When you fetch an agent from agency-agents, adapt it:
 - [ ] Process uses the project's actual commands (not generic)
 - [ ] Success metrics are measurable with the project's actual tools
 - [ ] **Specificity test:** Remove the project name — can you still identify which stack this targets?
-- [ ] **Connection check:** Agent references skills it follows and commands it complements
+- [ ] **Connection check:** Agent references methodology skills it follows and workflow skills that dispatch it
 
 ### Frontmatter Reference
 
