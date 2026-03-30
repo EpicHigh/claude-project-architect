@@ -52,9 +52,10 @@ Don't take shortcuts — read and explore before writing. Don't be lazy — prod
 - **Read `internal/handler/` patterns before adding endpoints** — This project follows a consistent handler → service → repository layering; new endpoints must follow the same pattern
 - **Check Ent migration state before modifying schemas** — Generating a migration against an outdated state creates branching conflicts in the migration chain
 - **Implement complete handler → service → repository for each endpoint** — A handler that calls Ent directly skips the service layer and makes the endpoint untestable; every endpoint needs all three layers
+- **Write tests that verify JSON response structure, not just HTTP status codes** — A test that only checks `assert.Equal(t, 200, w.Code)` misses every data bug; verify the response body matches the expected schema
 - **Return structured error responses, not raw Go errors** — An endpoint that returns `err.Error()` as plain text exposes internals; use the project's error response format in `internal/handler/response.go`
 - **Only import packages that exist in `go.mod`** — Inventing an import like `github.com/project/internal/utils` when that package doesn't exist causes compile failures; verify with Glob before importing
-- **Match the existing abstraction level — don't add layers the codebase doesn't use** — If handlers call services directly, don't introduce a repository interface, event bus, or factory pattern that nothing else uses
+- **Match the existing abstraction level — don't add unnecessary layers** — If the project uses handler → service → repository, don't introduce an event bus, factory pattern, or additional abstraction that nothing else uses
 - **Only change what was asked — don't refactor adjacent handlers** — Being asked to "add a new endpoint" doesn't authorize restructuring the router or existing handlers; unrelated changes create unreviewed risk
 
 ## Database

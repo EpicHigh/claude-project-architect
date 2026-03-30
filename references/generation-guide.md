@@ -243,13 +243,13 @@ Don't take shortcuts — read and explore before writing. Don't be lazy — prod
 | Testing | Test framework or E2E framework detected (section 8.6) |
 | Linting & Formatting | Linter, formatter, or typecheck command detected (section 8.7) |
 | Code Conventions | Any convention description populated from source files (section 1.5) |
-| Working Style | Always (at least 2 technologies detected) — 8-12 behavioral rules covering shortcuts, laziness, hallucination, over-engineering, scope creep, and verification. For single-technology projects, use universal rules from derivation steps 4-6. |
+| Working Style | Always included. When 2+ technologies detected, derive rules from stack intersections (steps 1-3) plus universal rules (steps 4-6). When only 1 technology detected, derive from universal rules (steps 4-6) only. Target 8-12 rules covering shortcuts, laziness, hallucination, over-engineering, scope creep, and verification. |
 | Git Conventions | Commit format or branch naming description populated (section 8.12) |
 | Database | Database detected (section 8.9) |
 
 ### Working Style Derivation
 
-Working Style rules prevent Claude's six bad habits: shortcuts, laziness, hallucination, over-engineering, scope creep, and not verifying. Each rule targets a specific stack intersection detected in Phase 1 — never generic advice.
+Working Style rules prevent Claude's six bad habits: shortcuts, laziness, hallucination, over-engineering, scope creep, and not verifying. Most rules target specific stack intersections detected in Phase 1. A minority address universal bad habits, anchored to the project's actual structure (file paths, commands, directory layout).
 
 **Derivation process:**
 
@@ -285,7 +285,7 @@ Working Style rules prevent Claude's six bad habits: shortcuts, laziness, halluc
 | Any project (anti-hallucination) | Verify file paths exist before referencing them in code | Writing `fs.readFile('./config/settings.json')` when `config/` doesn't exist causes runtime failures; use Read/Glob tools to confirm paths |
 | Any project (anti-over-engineering) | Match the existing abstraction level — don't add layers the codebase doesn't use | If the project calls services directly from handlers, don't introduce a repository pattern, event bus, or factory that nothing else uses |
 | Any project (anti-scope-creep) | Only change what was asked — don't refactor adjacent code | Being asked to "fix the login bug" doesn't authorize restructuring the entire auth module; unrelated changes create unreviewed risk |
-| Any project (verification) | Run lint and tests before declaring a task complete | Saying "this should work" without running `{{ lint_command }}` and `{{ test_command }}` leaves broken code for the user to debug |
+| Any project (verification) | Run lint and tests before declaring a task complete | Saying "this should work" without running `npm run lint` and `npm test` (or equivalent) leaves broken code for the user to debug |
 
 > **Note:** These are examples to adapt, not copy verbatim. Every generated rule must include a project-specific anchor (file path, config, directory, or detected pattern). If a rule reads as complete advice without any project reference, it's too generic.
 

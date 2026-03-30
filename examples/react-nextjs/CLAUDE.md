@@ -59,7 +59,7 @@ Don't take shortcuts — read and explore before writing. Don't be lazy — prod
 - **Check `components/ui/` before building custom UI** — This project uses shadcn/ui primitives; duplicating existing components creates visual inconsistency
 - **Implement complete Server Actions with validation and error handling** — A Server Action without Zod validation or try/catch returns raw errors to the client; every action needs input validation and a user-facing error response
 - **Write tests that verify rendered output, not just render-without-crash** — A test that only calls `render(<Component />)` without assertions catches nothing; assert on visible text, user interactions, and state changes
-- **Only import modules that exist in this project** — Inventing an import like `from @/lib/auth` when `lib/auth.ts` doesn't exist causes build failures; use Glob to verify before importing
+- **Only import modules that exist in this project** — Inventing an import like `import { auth } from '@/lib/auth'` when `lib/auth.ts` doesn't exist causes build failures; use Glob to verify before importing
 - **Match the existing component complexity — don't add unnecessary abstractions** — If existing pages fetch data directly in Server Components, don't introduce a custom data-fetching layer that nothing else uses
 - **Only change what was asked — don't refactor adjacent components** — Being asked to "fix the form validation" doesn't authorize restructuring the entire form library; unrelated changes create unreviewed risk
 
