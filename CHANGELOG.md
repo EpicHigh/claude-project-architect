@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2026-03-30
+
+### Added
+
+- **Working Style section in generated CLAUDE.md** — 8-12 behavioral rules derived from detected stack intersections, always included. Rules prevent six bad habits: shortcuts, laziness, hallucination, over-engineering, scope creep, and not verifying. Each rule references a detected technology, file, or directory — never generic advice
+- **Anti-shortcut rationalizations in methodology skills** — Anti-Patterns section now requires Shortcut Rationalizations (3-part: rationalization → why it's wrong → instead) with at least 2 per skill referencing specific project artifacts
+- **Anti-lazy rationalizations in methodology skills** — Lazy Rationalizations subsection (same 3-part format) with at least 2 per skill defining what "complete" means for the project
+- **Workflow Common Mistakes format** — 3-part structure (shortcut → rationalization → consequence) with 6 example entries in feature-development workflow
+- **Score caps on Dimensions 2, 5, 8** — cap at 6 for missing/generic Working Style (Dim 2), vague agent content (Dim 5), cap at 7 for missing rationalizations (Dim 8)
+- **Working Style Derivation process** — 7-step process for generating stack-specific rules from Phase 1 detections, with quality test and 19 example rows covering all six bad habits
+- **Intermediate scoring breakpoints** — Dimensions 2, 5, 8 expanded from 0/5/10 to 0/5/6/7/8/10 with distinct criteria at each level
+
+### Changed
+
+- Methodology skill Anti-Patterns section split into 3 subsections: Shortcut Rationalizations, Lazy Rationalizations, Common Mistakes
+- Workflow skill Common Mistakes upgraded from flat bullet list to structured 3-part entries
+- Quality validation checklist expanded with Working Style check, methodology anti-patterns check, no-vague-filler check, and behavioral consistency cross-file check
+- Example CLAUDE.md files (Go, Python, React) updated with 10-11 Working Style rules each
+
 ## [1.7.0] - 2026-03-28
 
 ### Changed

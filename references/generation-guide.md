@@ -153,6 +153,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 {{ end }}
 {{ end }}
 
+## Working Style
+
+Don't take shortcuts — read and explore before writing. Don't be lazy — produce thorough, complete output with proper error handling, validation, and tests. Don't hallucinate — only reference files, APIs, and imports that actually exist. Don't over-engineer — match the existing codebase's complexity level. Stay on scope — only change what was asked. Always verify — run lint and tests before declaring done.
+
+{{ for each working_style_rule }}
+- **{{ rule_title }}** — {{ rule_why }}
+{{ end }}
+
 {{ if commit_format_description or branch_naming_description }}
 ## Git Conventions
 
@@ -219,6 +227,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | `database_engine` | Section 8.9 database detection | `PostgreSQL` |
 | `orm_name` | Section 8.2 ORM framework detection | `Prisma`, `SQLAlchemy` |
 | `migration_command` | Section 8.14 script detection or ORM conventions | `npx prisma migrate dev` |
+| `working_style_rules` | Working Style Derivation (below) → list of behavioral rules from stack intersections + universal patterns | list of `{rule_title, rule_why}` |
+| `rule_title` | Working Style Derivation → short imperative action | `Read component boundary before adding data access` |
+| `rule_why` | Working Style Derivation → 1 sentence explaining why for THIS project | `the bundler fails because Prisma depends on Node.js APIs unavailable in the browser` |
 
 ### Section Inclusion Rules
 
@@ -230,8 +241,51 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | Testing | Test framework or E2E framework detected (section 8.6) |
 | Linting & Formatting | Linter, formatter, or typecheck command detected (section 8.7) |
 | Code Conventions | Any convention description populated from source files (section 1.5) |
+| Working Style | Always included. When 2+ technologies detected, derive rules from stack intersections (steps 1-3) plus universal rules (steps 4-6). When only 1 technology detected, derive from universal rules (steps 4-6) only. Target 8-12 rules covering shortcuts, laziness, hallucination, over-engineering, scope creep, and verification. |
 | Git Conventions | Commit format or branch naming description populated (section 8.12) |
 | Database | Database detected (section 8.9) |
+
+### Working Style Derivation
+
+Working Style rules prevent Claude's six bad habits: shortcuts, laziness, hallucination, over-engineering, scope creep, and not verifying. Most rules target specific stack intersections detected in Phase 1. A minority address universal bad habits, anchored to the project's actual structure (file paths, commands, directory layout).
+
+**Derivation process:**
+
+1. List all meaningful 2-way technology pairs from Phase 1 (e.g., Next.js+Prisma, Go+Gin, FastAPI+SQLAlchemy)
+2. For each pair, identify the most likely bad habit Claude will exhibit (shortcut, laziness, hallucination, over-engineering, scope creep, or not verifying)
+3. Write one rule: `[Action to take] — [Why it matters for THIS stack specifically]`
+4. Add 1-2 universal rules grounded in the project's actual structure (e.g., test runner, directory layout)
+5. Add 1-2 anti-lazy rules targeting shallow output patterns (e.g., complete all layers, assert behavior in tests)
+6. Add 1-2 rules targeting hallucination, over-engineering, scope creep, or verification — whichever are most relevant for this project's stack
+7. Target 8-12 rules total (covering as many bad habits as relevant). Every rule must reference a detected technology, file, or directory.
+
+**Quality test:** Remove project-specific references from a rule. If it still reads as complete advice, it's too generic — rewrite it.
+
+**Example rules by stack intersection:**
+
+| Stack Intersection | Rule Title | Rule Why |
+|--------------------|-----------|----------|
+| Next.js + Prisma | Read component boundary before adding data access | Prisma queries belong in Server Components or server actions, never in files with `'use client'` — the bundler fails because Prisma depends on Node.js APIs unavailable in the browser |
+| Next.js + App Router | Check `app/` route structure before creating files | This project uses App Router — `page.tsx`, `layout.tsx`, `loading.tsx` have special meanings; misnamed files silently break routing |
+| Go + Ent | Run `go generate ./ent` after schema changes, then read generated types | The generated API in `ent/` changes after every schema modification; coding against stale types causes compile errors |
+| Go + Gin | Read existing middleware chain before adding handlers | Routes inherit middleware from parent `r.Group()` in Gin — re-registering the same middleware on a child group causes it to run twice for that group's routes |
+| FastAPI + SQLAlchemy | Read existing router structure before adding endpoints | Routes use `Depends(get_db)` for session injection; endpoints that create their own sessions bypass transaction management |
+| FastAPI + Pydantic | Read existing schemas in `schemas/` before creating new ones | This project shares Pydantic models across endpoints; duplicating a schema instead of reusing it causes validation drift |
+| Any + test framework | Run existing tests before and after changes | You cannot distinguish pre-existing failures from regressions you introduced without a baseline |
+| Any monorepo | Identify which workspace is affected before making changes | Changes in shared packages affect all consumers; editing the wrong workspace breaks unrelated builds |
+| Any + database | Read the current migration state before modifying schemas | Generating a migration against an outdated state creates branching conflicts in the migration chain |
+| React + Tailwind | Read existing component patterns before styling | This project has established spacing/color conventions in shared components; ad-hoc Tailwind classes create visual inconsistency |
+| Any multi-layer project | Implement all layers in each vertical slice — no stubs or TODOs | A stub service or placeholder test leaves the feature broken; each slice must pass lint + test independently |
+| Any + test framework | Write tests that assert behavior, not just existence | A test that only checks `response.status === 200` without verifying the body misses every logic bug in the endpoint |
+| Any backend framework | Handle error cases, not just the happy path | An endpoint without validation or error responses returns 500 on bad input; users see raw stack traces |
+| Any + TypeScript/Go | Use precise types — no `any`, `interface{}`, or `object` as shortcuts | Vague types bypass the compiler's ability to catch bugs; every `any` is a bug hiding spot (reference the project's `tsconfig.json` strict mode or equivalent) |
+| Any project (anti-hallucination) | Only import modules and call functions that exist in the codebase | Inventing an import like `from app.utils import validate_email` when `app/utils.py` has no such function causes an immediate ImportError/crash |
+| Any project (anti-hallucination) | Verify file paths exist before referencing them in code | Writing `fs.readFile('./config/settings.json')` when `config/` doesn't exist causes runtime failures; use Read/Glob tools to confirm paths |
+| Any project (anti-over-engineering) | Match the existing abstraction level — don't add layers the codebase doesn't use | If the project calls services directly from handlers, don't introduce a repository pattern, event bus, or factory that nothing else uses |
+| Any project (anti-scope-creep) | Only change what was asked — don't refactor adjacent code | Being asked to "fix the login bug" doesn't authorize restructuring the entire auth module; unrelated changes create unreviewed risk |
+| Any project (verification) | Run lint and tests before declaring a task complete | Saying "this should work" without running `npm run lint` and `npm test` (or equivalent) leaves broken code for the user to debug |
+
+> **Note:** These are examples to adapt, not copy verbatim. Every generated rule must include a project-specific anchor (file path, config, directory, or detected pattern). If a rule reads as complete advice without any project reference, it's too generic.
 
 ---
 
@@ -353,7 +407,25 @@ At least 2 concrete Input/Output pairs from the actual project.
 Project-specific patterns with file references.
 
 ## Anti-Patterns
-Common mistakes in this codebase and why they cause problems.
+
+### Shortcut Rationalizations
+Claude will attempt to skip steps by rationalizing. Each entry uses a three-part format:
+- **Rationalization:** The plausible excuse Claude tells itself (e.g., "I already know this pattern")
+- **Why it's wrong:** Project-specific reason this fails, referencing a file or directory
+- **Instead:** Concrete action to take
+
+At least 2 rationalizations per skill, each referencing a specific project artifact.
+
+### Lazy Rationalizations
+Claude will produce shallow output by rationalizing. Each entry uses the same three-part format:
+- **Rationalization:** The plausible excuse (e.g., "This is good enough for now")
+- **Why it's wrong:** Project-specific reason this matters, referencing what "complete" means
+- **Instead:** What thorough output looks like for THIS project
+
+At least 2 lazy rationalizations per skill, each describing what "complete" means for this project.
+
+### Common Mistakes
+Project-specific mistakes when working with this codebase's technology combination.
 
 ## Agent Reference
 Which agent(s) follow this methodology when dispatched.
@@ -377,6 +449,9 @@ Which agent(s) follow this methodology when dispatched.
 - [ ] Instructions explain WHY (theory of mind)
 - [ ] At least 2 Input/Output examples from the actual project
 - [ ] References which agent(s) follow this methodology
+- [ ] Anti-Patterns includes at least 2 shortcut rationalizations specific to this project's stack
+- [ ] Anti-Patterns includes at least 2 lazy rationalizations defining what "complete" means for this project
+- [ ] Each rationalization references a concrete project artifact (file, directory, config)
 
 ---
 
@@ -425,8 +500,13 @@ Run tests, commit, summarize.
 | 3 | agent-name | What it does |
 
 ## Common Mistakes
-Document rationalization patterns — how agents skip steps and why it matters.
+Document rationalization patterns — how agents skip steps and why it matters. Use a three-part format:
+- **Shortcut:** What the agent will try to skip
+- **Rationalization:** The plausible excuse ("I can infer the schema from the model name")
+- **Consequence:** What goes wrong in THIS project specifically
 ```
+
+> **Note:** This format differs from methodology skills' Anti-Patterns (Rationalization / Why it's wrong / Instead) intentionally. Methodology skills target the developer fixing a single task — they need a concrete "Instead" action. Workflow Common Mistakes target multi-phase orchestration — they need to explain the downstream "Consequence" when agents skip a phase.
 
 **Key structural patterns:**
 
@@ -534,10 +614,29 @@ For each vertical slice:
 
 ## Common Mistakes
 
-- Implementing horizontal layers (all models, then all services) instead of vertical slices
-- Skipping the plan phase and jumping straight to code
-- Stopping after one review pass — the fix itself may introduce new issues; loop until zero remain
-- Making slices too thick — each should be independently demoable
+- **Shortcut:** Implementing horizontal layers (all models, then all services) instead of vertical slices
+  - **Rationalization:** "It's more efficient to batch similar work"
+  - **Consequence:** Nothing is demoable until everything is done; a bug in the model layer blocks all progress
+
+- **Shortcut:** Skipping the plan phase and jumping straight to code
+  - **Rationalization:** "The feature is straightforward, I already know what to build"
+  - **Consequence:** Missed edge cases in how the project's existing patterns interact; rework costs more than planning
+
+- **Shortcut:** Stopping after one review pass
+  - **Rationalization:** "The fixes were minor, no need to re-review"
+  - **Consequence:** The fix itself may introduce new issues; only a zero-findings review pass confirms readiness
+
+- **Shortcut:** Making slices too thick — bundling too many layers into one increment
+  - **Rationalization:** "These layers are tightly coupled, they have to go together"
+  - **Consequence:** Large diffs are harder to review and more likely to contain hidden regressions
+
+- **Shortcut:** Writing stub implementations with TODO comments instead of complete code
+  - **Rationalization:** "I'll fill in the details in a follow-up slice"
+  - **Consequence:** Stubs break the "each slice is independently demoable" principle; downstream slices build on broken foundations
+
+- **Shortcut:** Writing tests that only check status codes without verifying response bodies or side effects
+  - **Rationalization:** "The test proves the endpoint works"
+  - **Consequence:** The test passes but misses every logic bug; regressions go undetected until production
 `````
 
 ---
@@ -1175,6 +1274,9 @@ For each generated file:
 - [ ] **Skill description check** — each skill description is ~100 words with 5+ action-verb trigger phrases
 - [ ] **Skill evals check** — each skill has `evals/evals.json` with 2-3 test prompts and discriminating assertions
 - [ ] **Skill size check** — each SKILL.md is under 500 lines
+- [ ] **CLAUDE.md Working Style check** — Working Style section exists with 8-12 rules covering all relevant bad habits, each referencing a detected technology, file, or directory
+- [ ] **Methodology anti-patterns check** — each methodology skill has at least 2 shortcut rationalizations and 2 lazy rationalizations with project-specific references (file, directory, config)
+- [ ] **No vague filler check** — no generated file contains phrases like "follow best practices", "use appropriate patterns", "ensure quality" without project-specific context
 
 ### Cross-File Checks
 
@@ -1184,6 +1286,7 @@ For each generated file:
 - [ ] **Hooks use validated commands** — hook commands were confirmed installed (Phase 1 should have run `command -v`)
 - [ ] **Workflow connections present** — workflow skills dispatch agents, agents reference methodology skills, methodology skills reference agents (per section 9.8, only for entities that were actually generated)
 - [ ] **Workflow skill dispatch valid** — every agent name in workflow skill dispatch tables refers to an agent that was actually generated
+- [ ] **Behavioral consistency** — Working Style rules in CLAUDE.md and Anti-Patterns in methodology skills address the same bad-habit categories (shortcuts, laziness, hallucination, over-engineering, scope creep, verification) without contradicting each other and without duplicating the exact same rule text verbatim
 
 ### Completeness Checks (hard requirements — fail if missing)
 
@@ -1404,13 +1507,18 @@ Quantitative evaluation of all generated outputs as a holistic system. Used duri
 
 **Definition:** Every line in every generated file traces to a Phase 1 detection. No generic advice.
 
-**Verification action:** For each generated file, read 5 random content lines. For each, identify which Phase 1 detection it traces to. If a line could appear unchanged in any project's config, it fails.
+**Verification action:** For each generated file, read 5 random content lines. For each, identify which Phase 1 detection it traces to. If a line could appear unchanged in any project's config, it fails. Also verify CLAUDE.md contains a Working Style section with 8-12 project-specific behavioral rules covering shortcuts, laziness, hallucination, over-engineering, scope creep, and verification, each referencing a detected technology, file, or directory.
 
 | Score | Criteria |
 |-------|----------|
 | 0 | Most content is generic framework documentation or boilerplate |
 | 5 | Mix of specific and generic — some lines trace to detections, some are filler |
-| 10 | Every content line traces to a specific detection. Removing the project name still identifies the stack. |
+| 6 | Content lines trace to detections, but Working Style section is entirely missing |
+| 7 | Every content line traces to a detection; Working Style exists but has fewer than 8 rules or rules lack project-specific anchors |
+| 8 | Every content line traces to a detection; Working Style has 8-12 rules but is missing some bad-habit categories |
+| 10 | Every content line traces to a specific detection. Working Style has 8-12 stack-specific rules covering all relevant bad habits. Removing the project name still identifies the stack. |
+
+**Score cap:** If CLAUDE.md has no Working Style section or rules are generic (could apply to any project), this dimension cannot score above 6.
 
 ---
 
@@ -1444,15 +1552,20 @@ Quantitative evaluation of all generated outputs as a holistic system. Used duri
 
 ### Dimension 5: Depth
 
-**Definition:** Agents are at least 80 lines with all 7 required sections. Skills teach methodology, not surface-level advice.
+**Definition:** Agents are at least 80 lines with all 7 required sections and substantive content. Skills teach methodology with depth — no vague advice, no stubs, no TODO placeholders. Every section must contain project-specific knowledge, not generic filler.
 
-**Verification action:** For each agent, count lines and verify all 7 sections exist. Verify Stack Expertise is the longest section. For each skill, verify it teaches methodology specific to the project's stack intersection (not just "follow best practices").
+**Verification action:** For each agent, count lines and verify all 7 sections exist. Verify Stack Expertise is the longest section. Read the Stack Expertise section — does it contain actual file paths, patterns, and code conventions from this project? For each skill, read the Examples — do they show realistic complexity (not just happy paths)? For each skill, verify it teaches methodology specific to the project's stack intersection. Flag any section that uses phrases like "follow best practices", "use appropriate patterns", "ensure quality" without project-specific references.
 
 | Score | Criteria |
 |-------|----------|
 | 0 | Agents are stubs (under 40 lines) or missing sections; skills are generic |
 | 5 | Agents meet minimum length but Stack Expertise is thin or generic; skills have some project-specific content |
-| 10 | All agents 80+ lines, all 7 sections present, Stack Expertise is the longest section with project-specific patterns. Skills teach deep methodology for the detected stack intersection. |
+| 6 | Agents meet minimum length and have all sections, but some sections contain vague advice ("follow best practices", "ensure quality") instead of project-specific knowledge |
+| 7 | All agents 80+ lines, all sections present with project-specific content, but skill examples are thin — fewer than 2 Input/Output pairs per skill |
+| 8 | All agents 80+ lines, all 7 sections present with 2+ examples per skill, but examples only cover happy paths without error cases or edge cases |
+| 10 | All agents 80+ lines, all 7 sections present, Stack Expertise is the longest section with project-specific patterns. Skills teach deep methodology with realistic examples covering happy paths and error cases. Zero vague phrases. |
+
+**Score cap:** If any agent section uses generic phrases ("follow best practices", "use appropriate patterns", "ensure quality") without project-specific references, this dimension cannot score above 6.
 
 ---
 
@@ -1488,13 +1601,18 @@ Quantitative evaluation of all generated outputs as a holistic system. Used duri
 
 **Definition:** A new developer can immediately use the generated config. Invocable skills are runnable. Methodology and workflow skills activate on natural queries. INSTRUCTION.md is a useful onboarding guide.
 
-**Verification action:** Read INSTRUCTION.md — does it list all generated outputs with correct invocation examples? Read each invocable skill — are steps concrete and executable (not vague)? Read each skill description — does it contain natural-language triggers matching how a developer would phrase a request?
+**Verification action:** Read INSTRUCTION.md — does it list all generated outputs with correct invocation examples? Read each invocable skill — are steps concrete and executable (not vague)? Read each skill description — does it contain natural-language triggers matching how a developer would phrase a request? Also verify each methodology skill's Anti-Patterns section includes at least 2 shortcut rationalizations AND at least 2 lazy rationalizations, each with project-specific references (file, directory, config).
 
 | Score | Criteria |
 |-------|----------|
 | 0 | INSTRUCTION.md is a placeholder or missing. Invocable skills have vague steps like "validate the code." |
 | 5 | INSTRUCTION.md is present and accurate but missing some outputs. Skills work but some steps lack specificity. |
-| 10 | INSTRUCTION.md perfectly summarizes all outputs with working examples. Every invocable skill has concrete, executable steps. Every skill has natural activation triggers. |
+| 6 | All outputs documented and mostly actionable, but some invocable skill steps are vague or INSTRUCTION.md is missing invocation examples |
+| 7 | All outputs documented and actionable, but methodology skills are missing shortcut rationalizations, lazy rationalizations, or both |
+| 8 | All outputs documented and actionable; methodology skills have both rationalization types but some are generic or lack project references |
+| 10 | INSTRUCTION.md perfectly summarizes all outputs with working examples. Every invocable skill has concrete, executable steps. Every skill has natural activation triggers. Every methodology skill has at least 2 stack-specific shortcut rationalizations AND at least 2 lazy rationalizations. |
+
+**Score cap:** If methodology skills have no shortcut rationalizations, no lazy rationalizations, or rationalizations are generic, this dimension cannot score above 7.
 
 ---
 

@@ -42,6 +42,22 @@ go test ./internal/handler/...
 make lint
 ```
 
+## Working Style
+
+Don't take shortcuts — read and explore before writing. Don't be lazy — produce thorough, complete output with proper error handling, validation, and tests. Don't hallucinate — only reference files, APIs, and imports that actually exist. Don't over-engineer — match the existing codebase's complexity level. Stay on scope — only change what was asked. Always verify — run lint and tests before declaring done.
+
+- **Run `go generate ./ent` after schema changes, then read generated types** — The generated API in `ent/` changes after every schema modification; coding against stale types causes compile errors
+- **Read existing middleware chain before adding handlers** — Routes inherit middleware from parent `r.Group()` in Gin; re-registering the same middleware on a child group causes it to run twice for that group's routes
+- **Run `make lint` and `make test` before and after changes** — You cannot distinguish pre-existing failures from regressions without a baseline; never declare done without passing lint + tests
+- **Read `internal/handler/` patterns before adding endpoints** — This project follows a consistent handler → service → repository layering; new endpoints must follow the same pattern
+- **Check Ent migration state before modifying schemas** — Generating a migration against an outdated state creates branching conflicts in the migration chain
+- **Implement complete handler → service → repository for each endpoint** — A handler that calls Ent directly skips the service layer and makes the endpoint untestable; every endpoint needs all three layers
+- **Write tests that verify JSON response structure, not just HTTP status codes** — A test that only checks `assert.Equal(t, 200, w.Code)` misses every data bug; verify the response body matches the expected schema
+- **Return structured error responses, not raw Go errors** — An endpoint that returns `err.Error()` as plain text exposes internals; use the project's error response format in `internal/handler/response.go`
+- **Only import packages that exist in `go.mod`** — Inventing an import like `github.com/project/internal/utils` when that package doesn't exist causes compile failures; verify with Glob before importing
+- **Match the existing abstraction level — don't add unnecessary layers** — If the project uses handler → service → repository, don't introduce an event bus, factory pattern, or additional abstraction that nothing else uses
+- **Only change what was asked — don't refactor adjacent handlers** — Being asked to "add a new endpoint" doesn't authorize restructuring the router or existing handlers; unrelated changes create unreviewed risk
+
 ## Database
 
 - **Engine:** PostgreSQL (via Ent ORM)
