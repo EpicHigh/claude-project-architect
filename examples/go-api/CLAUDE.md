@@ -49,6 +49,8 @@ make lint
 - **Run `make test` before and after changes** — You cannot distinguish pre-existing failures from regressions without a baseline
 - **Read `internal/handler/` patterns before adding endpoints** — This project follows a consistent handler → service → repository layering; skipping the service layer couples handlers directly to Ent queries
 - **Check Ent migration state before modifying schemas** — Generating a migration against an outdated state creates branching conflicts in the migration chain
+- **Implement complete handler → service → repository for each endpoint** — A handler that calls Ent directly skips the service layer and makes the endpoint untestable; every endpoint needs all three layers
+- **Return structured error responses, not raw Go errors** — An endpoint that returns `err.Error()` as plain text exposes internals; use the project's error response format in `internal/handler/response.go`
 
 ## Database
 

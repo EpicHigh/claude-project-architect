@@ -49,6 +49,8 @@ ruff format .
 - **Run `pytest` before and after changes** — You cannot distinguish pre-existing failures from regressions without a baseline
 - **Check Alembic migration state before modifying models** — Generating a migration against an outdated state creates branching conflicts in the migration chain
 - **Read `app/dependencies.py` before adding dependency injection** — This project centralizes shared dependencies; duplicating them in individual routers creates inconsistent behavior
+- **Implement complete request/response schemas with validation** — An endpoint with `dict` input instead of a Pydantic model bypasses all validation; every endpoint needs typed schemas in `schemas/`
+- **Write tests that verify response body structure, not just status codes** — A test that only checks `assert response.status_code == 200` misses every data bug; verify the JSON body matches the Pydantic response schema
 
 ## Database
 

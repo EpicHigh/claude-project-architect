@@ -55,6 +55,8 @@ npm run lint
 - **Run `npm test` before and after changes** — Jest tests use the project's custom config; you cannot distinguish pre-existing failures from regressions without a baseline
 - **Read existing Prisma schema before adding models** — `prisma/schema.prisma` has established relation patterns; inconsistent relations cause migration failures
 - **Check `components/ui/` before building custom UI** — This project uses shadcn/ui primitives; duplicating existing components creates visual inconsistency
+- **Implement complete Server Actions with validation and error handling** — A Server Action without Zod validation or try/catch returns raw errors to the client; every action needs input validation and a user-facing error response
+- **Write tests that verify rendered output, not just render-without-crash** — A test that only calls `render(<Component />)` without assertions catches nothing; assert on visible text, user interactions, and state changes
 
 ## Database
 

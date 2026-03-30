@@ -241,7 +241,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | Testing | Test framework or E2E framework detected (section 8.6) |
 | Linting & Formatting | Linter, formatter, or typecheck command detected (section 8.7) |
 | Code Conventions | Any convention description populated from source files (section 1.5) |
-| Working Style | Always (at least 2 technologies detected) — 4-6 behavioral rules derived from stack intersections. For single-technology projects, use universal rules from derivation step 4. |
+| Working Style | Always (at least 2 technologies detected) — 5-8 behavioral rules (mix of anti-shortcut and anti-lazy) derived from stack intersections. For single-technology projects, use universal rules from derivation steps 4-5. |
 | Git Conventions | Commit format or branch naming description populated (section 8.12) |
 | Database | Database detected (section 8.9) |
 
@@ -252,10 +252,11 @@ Working Style rules prevent Claude from taking shortcuts. Each rule targets a sp
 **Derivation process:**
 
 1. List all meaningful 2-way technology pairs from Phase 1 (e.g., Next.js+Prisma, Go+Gin, FastAPI+SQLAlchemy)
-2. For each pair, identify the most likely shortcut Claude will take
+2. For each pair, identify the most likely shortcut or lazy pattern Claude will exhibit
 3. Write one rule: `[Action to take] — [Why it matters for THIS stack specifically]`
 4. Add 1-2 universal rules grounded in the project's actual structure (e.g., test runner, directory layout)
-5. Target 4-6 rules total. Every rule must reference a detected technology, file, or directory.
+5. Add 1-2 anti-lazy rules targeting shallow output patterns specific to the project's complexity (e.g., multi-layer features need complete implementation, tests need behavioral assertions)
+6. Target 5-8 rules total (mix of anti-shortcut and anti-lazy). Every rule must reference a detected technology, file, or directory.
 
 **Quality test:** Remove project-specific references from a rule. If it still reads as complete advice, it's too generic — rewrite it.
 
@@ -273,6 +274,10 @@ Working Style rules prevent Claude from taking shortcuts. Each rule targets a sp
 | Any monorepo | Identify which workspace is affected before making changes | Changes in shared packages affect all consumers; editing the wrong workspace breaks unrelated builds |
 | Any + database | Read the current migration state before modifying schemas | Generating a migration against an outdated state creates branching conflicts in the migration chain |
 | React + Tailwind | Read existing component patterns before styling | This project has established spacing/color conventions in shared components; ad-hoc Tailwind classes create visual inconsistency |
+| Any multi-layer project | Implement all layers in each vertical slice — no stubs or TODOs | A stub service or placeholder test leaves the feature broken; each slice must pass lint + test independently |
+| Any + test framework | Write tests that assert behavior, not just existence | A test that only checks `response.status === 200` without verifying the body misses every logic bug in the endpoint |
+| Any backend framework | Handle error cases, not just the happy path | An endpoint without validation or error responses returns 500 on bad input; users see raw stack traces |
+| Any + TypeScript/Go | Use precise types — no `any`, `interface{}`, or `object` as shortcuts | Vague types bypass the compiler's ability to catch bugs; every `any` is a bug hiding spot |
 
 ---
 
@@ -403,6 +408,14 @@ Claude will attempt to skip steps by rationalizing. Each entry uses a three-part
 
 At least 2 rationalizations per skill, each referencing a specific project artifact.
 
+### Lazy Rationalizations
+Claude will produce shallow output by rationalizing. Each entry uses the same three-part format:
+- **Rationalization:** The plausible excuse (e.g., "This is good enough for now")
+- **Why it's wrong:** Project-specific reason this matters, referencing what "complete" means
+- **Instead:** What thorough output looks like for THIS project
+
+At least 2 lazy rationalizations per skill, each describing what "complete" means for this project.
+
 ### Common Mistakes
 Project-specific mistakes when working with this codebase's technology combination.
 
@@ -429,6 +442,7 @@ Which agent(s) follow this methodology when dispatched.
 - [ ] At least 2 Input/Output examples from the actual project
 - [ ] References which agent(s) follow this methodology
 - [ ] Anti-Patterns includes at least 2 shortcut rationalizations specific to this project's stack
+- [ ] Anti-Patterns includes at least 2 lazy rationalizations defining what "complete" means for this project
 - [ ] Each rationalization references a concrete project artifact (file, directory, config)
 
 ---
@@ -607,6 +621,14 @@ For each vertical slice:
 - **Shortcut:** Making slices too thick — bundling too many layers into one increment
   - **Rationalization:** "These layers are tightly coupled, they have to go together"
   - **Consequence:** Large diffs are harder to review and more likely to contain hidden regressions
+
+- **Shortcut:** Writing stub implementations with TODO comments instead of complete code
+  - **Rationalization:** "I'll fill in the details in a follow-up slice"
+  - **Consequence:** Stubs break the "each slice is independently demoable" principle; downstream slices build on broken foundations
+
+- **Shortcut:** Writing tests that only check status codes without verifying response bodies or side effects
+  - **Rationalization:** "The test proves the endpoint works"
+  - **Consequence:** The test passes but misses every logic bug; regressions go undetected until production
 `````
 
 ---
@@ -1244,8 +1266,9 @@ For each generated file:
 - [ ] **Skill description check** — each skill description is ~100 words with 5+ action-verb trigger phrases
 - [ ] **Skill evals check** — each skill has `evals/evals.json` with 2-3 test prompts and discriminating assertions
 - [ ] **Skill size check** — each SKILL.md is under 500 lines
-- [ ] **CLAUDE.md Working Style check** — Working Style section exists with 4-6 rules, each referencing a detected stack intersection
-- [ ] **Methodology anti-patterns check** — each methodology skill has at least 2 shortcut rationalizations with project-specific references (file, directory, config)
+- [ ] **CLAUDE.md Working Style check** — Working Style section exists with 5-8 rules (mix of anti-shortcut and anti-lazy), each referencing a detected stack intersection
+- [ ] **Methodology anti-patterns check** — each methodology skill has at least 2 shortcut rationalizations and 2 lazy rationalizations with project-specific references (file, directory, config)
+- [ ] **No vague filler check** — no generated file contains phrases like "follow best practices", "use appropriate patterns", "ensure quality" without project-specific context
 
 ### Cross-File Checks
 
@@ -1476,15 +1499,15 @@ Quantitative evaluation of all generated outputs as a holistic system. Used duri
 
 **Definition:** Every line in every generated file traces to a Phase 1 detection. No generic advice.
 
-**Verification action:** For each generated file, read 5 random content lines. For each, identify which Phase 1 detection it traces to. If a line could appear unchanged in any project's config, it fails. Also verify CLAUDE.md contains a Working Style section with 4-6 project-specific behavioral rules, each referencing a detected technology intersection.
+**Verification action:** For each generated file, read 5 random content lines. For each, identify which Phase 1 detection it traces to. If a line could appear unchanged in any project's config, it fails. Also verify CLAUDE.md contains a Working Style section with 5-8 project-specific behavioral rules (mix of anti-shortcut and anti-lazy), each referencing a detected technology intersection.
 
 | Score | Criteria |
 |-------|----------|
 | 0 | Most content is generic framework documentation or boilerplate |
 | 5 | Mix of specific and generic — some lines trace to detections, some are filler |
 | 6 | Content lines trace to detections, but Working Style section is entirely missing |
-| 8 | Every content line traces to a detection, but Working Style has fewer than 4 rules or some rules are generic |
-| 10 | Every content line traces to a specific detection. Working Style has 4-6 stack-specific rules. Removing the project name still identifies the stack. |
+| 8 | Every content line traces to a detection, but Working Style has fewer than 5 rules or is missing anti-lazy rules |
+| 10 | Every content line traces to a specific detection. Working Style has 5-8 stack-specific rules (anti-shortcut + anti-lazy). Removing the project name still identifies the stack. |
 
 **Score cap:** If CLAUDE.md has no Working Style section or rules are generic (could apply to any project), this dimension cannot score above 6.
 
@@ -1520,15 +1543,19 @@ Quantitative evaluation of all generated outputs as a holistic system. Used duri
 
 ### Dimension 5: Depth
 
-**Definition:** Agents are at least 80 lines with all 7 required sections. Skills teach methodology, not surface-level advice.
+**Definition:** Agents are at least 80 lines with all 7 required sections and substantive content. Skills teach methodology with depth — no vague advice, no stubs, no TODO placeholders. Every section must contain project-specific knowledge, not generic filler.
 
-**Verification action:** For each agent, count lines and verify all 7 sections exist. Verify Stack Expertise is the longest section. For each skill, verify it teaches methodology specific to the project's stack intersection (not just "follow best practices").
+**Verification action:** For each agent, count lines and verify all 7 sections exist. Verify Stack Expertise is the longest section. Read the Stack Expertise section — does it contain actual file paths, patterns, and code conventions from this project? For each skill, read the Examples — do they show realistic complexity (not just happy paths)? For each skill, verify it teaches methodology specific to the project's stack intersection. Flag any section that uses phrases like "follow best practices", "use appropriate patterns", "ensure quality" without project-specific references.
 
 | Score | Criteria |
 |-------|----------|
 | 0 | Agents are stubs (under 40 lines) or missing sections; skills are generic |
 | 5 | Agents meet minimum length but Stack Expertise is thin or generic; skills have some project-specific content |
-| 10 | All agents 80+ lines, all 7 sections present, Stack Expertise is the longest section with project-specific patterns. Skills teach deep methodology for the detected stack intersection. |
+| 6 | Agents meet minimum length and have all sections, but some sections contain vague advice ("follow best practices", "ensure quality") instead of project-specific knowledge |
+| 8 | All agents 80+ lines, all 7 sections present, content is project-specific but some examples only cover happy paths or lack edge cases |
+| 10 | All agents 80+ lines, all 7 sections present, Stack Expertise is the longest section with project-specific patterns. Skills teach deep methodology with realistic examples covering happy paths and error cases. Zero vague phrases. |
+
+**Score cap:** If any agent section uses generic phrases ("follow best practices", "use appropriate patterns", "ensure quality") without project-specific references, this dimension cannot score above 6.
 
 ---
 
