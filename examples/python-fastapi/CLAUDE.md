@@ -42,6 +42,14 @@ ruff check .
 ruff format .
 ```
 
+## Working Style
+
+- **Read existing router structure before adding endpoints** — Routes use `Depends(get_db)` for session injection; endpoints that create their own sessions bypass transaction management
+- **Read existing Pydantic schemas in `schemas/` before creating new ones** — This project shares schemas across endpoints; duplicating instead of reusing causes validation drift
+- **Run `pytest` before and after changes** — You cannot distinguish pre-existing failures from regressions without a baseline
+- **Check Alembic migration state before modifying models** — Generating a migration against an outdated state creates conflicts that corrupt the migration chain
+- **Read `app/dependencies.py` before adding dependency injection** — This project centralizes shared dependencies; duplicating them in individual routers creates inconsistent behavior
+
 ## Database
 
 - **Engine:** PostgreSQL

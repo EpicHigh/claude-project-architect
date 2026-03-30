@@ -42,6 +42,13 @@ go test ./internal/handler/...
 make lint
 ```
 
+## Working Style
+
+- **Run `go generate ./ent` after schema changes, then read generated types** — The generated API in `ent/` changes after every schema modification; coding against stale types causes compile errors
+- **Read existing middleware chain before adding handlers** — Routes inherit middleware from parent `r.Group()` in Gin; adding duplicate auth/logging creates double-execution bugs
+- **Run `make test` before and after changes** — You cannot distinguish pre-existing failures from regressions without a baseline
+- **Read `internal/handler/` patterns before adding endpoints** — This project follows a consistent handler → service → repository layering; skipping the service layer couples handlers directly to Ent queries
+
 ## Database
 
 - **Engine:** PostgreSQL (via Ent ORM)
