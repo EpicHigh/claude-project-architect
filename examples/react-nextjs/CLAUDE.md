@@ -50,6 +50,8 @@ npm run lint
 
 ## Working Style
 
+Don't take shortcuts — read and explore before writing. Don't be lazy — produce thorough, complete output with proper error handling, validation, and tests.
+
 - **Read component boundary before adding data access** — Prisma queries belong in Server Components or server actions (`app/` files without `'use client'`); the bundler fails because Prisma depends on Node.js APIs unavailable in the browser
 - **Check `app/` route structure before creating files** — `page.tsx`, `layout.tsx`, `loading.tsx` have special meanings in App Router; misnamed files silently break routing
 - **Run `npm test` before and after changes** — Jest tests use the project's custom config; you cannot distinguish pre-existing failures from regressions without a baseline

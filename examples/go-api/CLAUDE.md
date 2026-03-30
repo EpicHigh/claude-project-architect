@@ -44,6 +44,8 @@ make lint
 
 ## Working Style
 
+Don't take shortcuts — read and explore before writing. Don't be lazy — produce thorough, complete output with proper error handling, validation, and tests.
+
 - **Run `go generate ./ent` after schema changes, then read generated types** — The generated API in `ent/` changes after every schema modification; coding against stale types causes compile errors
 - **Read existing middleware chain before adding handlers** — Routes inherit middleware from parent `r.Group()` in Gin; re-registering the same middleware on a child group causes it to run twice for that group's routes
 - **Run `make test` before and after changes** — You cannot distinguish pre-existing failures from regressions without a baseline

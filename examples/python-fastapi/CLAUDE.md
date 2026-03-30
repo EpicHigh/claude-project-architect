@@ -44,6 +44,8 @@ ruff format .
 
 ## Working Style
 
+Don't take shortcuts — read and explore before writing. Don't be lazy — produce thorough, complete output with proper error handling, validation, and tests.
+
 - **Read existing router structure before adding endpoints** — Routes use `Depends(get_db)` for session injection; endpoints that create their own sessions bypass transaction management
 - **Read existing Pydantic schemas in `schemas/` before creating new ones** — This project shares schemas across endpoints; duplicating instead of reusing causes validation drift
 - **Run `pytest` before and after changes** — You cannot distinguish pre-existing failures from regressions without a baseline

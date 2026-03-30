@@ -156,6 +156,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 {{ if working_style_rules }}
 ## Working Style
 
+Don't take shortcuts — read and explore before writing. Don't be lazy — produce thorough, complete output with proper error handling, validation, and tests.
+
 {{ for each working_style_rule }}
 - **{{ rule_title }}** — {{ rule_why }}
 {{ end }}
@@ -277,7 +279,9 @@ Working Style rules prevent Claude from taking shortcuts. Each rule targets a sp
 | Any multi-layer project | Implement all layers in each vertical slice — no stubs or TODOs | A stub service or placeholder test leaves the feature broken; each slice must pass lint + test independently |
 | Any + test framework | Write tests that assert behavior, not just existence | A test that only checks `response.status === 200` without verifying the body misses every logic bug in the endpoint |
 | Any backend framework | Handle error cases, not just the happy path | An endpoint without validation or error responses returns 500 on bad input; users see raw stack traces |
-| Any + TypeScript/Go | Use precise types — no `any`, `interface{}`, or `object` as shortcuts | Vague types bypass the compiler's ability to catch bugs; every `any` is a bug hiding spot |
+| Any + TypeScript/Go | Use precise types — no `any`, `interface{}`, or `object` as shortcuts | Vague types bypass the compiler's ability to catch bugs; every `any` is a bug hiding spot (reference the project's `tsconfig.json` strict mode or equivalent) |
+
+> **Note:** These are examples to adapt, not copy verbatim. Every generated rule must include a project-specific anchor (file path, config, directory, or detected pattern). If a rule reads as complete advice without any project reference, it's too generic.
 
 ---
 
@@ -1591,17 +1595,17 @@ Quantitative evaluation of all generated outputs as a holistic system. Used duri
 
 **Definition:** A new developer can immediately use the generated config. Invocable skills are runnable. Methodology and workflow skills activate on natural queries. INSTRUCTION.md is a useful onboarding guide.
 
-**Verification action:** Read INSTRUCTION.md — does it list all generated outputs with correct invocation examples? Read each invocable skill — are steps concrete and executable (not vague)? Read each skill description — does it contain natural-language triggers matching how a developer would phrase a request? Also verify each methodology skill's Anti-Patterns section includes at least 2 shortcut rationalizations with project-specific references (file, directory, config).
+**Verification action:** Read INSTRUCTION.md — does it list all generated outputs with correct invocation examples? Read each invocable skill — are steps concrete and executable (not vague)? Read each skill description — does it contain natural-language triggers matching how a developer would phrase a request? Also verify each methodology skill's Anti-Patterns section includes at least 2 shortcut rationalizations AND at least 2 lazy rationalizations, each with project-specific references (file, directory, config).
 
 | Score | Criteria |
 |-------|----------|
 | 0 | INSTRUCTION.md is a placeholder or missing. Invocable skills have vague steps like "validate the code." |
 | 5 | INSTRUCTION.md is present and accurate but missing some outputs. Skills work but some steps lack specificity. |
-| 7 | All outputs documented and actionable, but methodology skills have no structured shortcut rationalizations |
-| 8 | All outputs documented and actionable; methodology skills have rationalizations but some are generic or lack project references |
-| 10 | INSTRUCTION.md perfectly summarizes all outputs with working examples. Every invocable skill has concrete, executable steps. Every skill has natural activation triggers. Every methodology skill has at least 2 stack-specific shortcut rationalizations. |
+| 7 | All outputs documented and actionable, but methodology skills are missing shortcut rationalizations, lazy rationalizations, or both |
+| 8 | All outputs documented and actionable; methodology skills have both rationalization types but some are generic or lack project references |
+| 10 | INSTRUCTION.md perfectly summarizes all outputs with working examples. Every invocable skill has concrete, executable steps. Every skill has natural activation triggers. Every methodology skill has at least 2 stack-specific shortcut rationalizations AND at least 2 lazy rationalizations. |
 
-**Score cap:** If methodology skills have no shortcut rationalizations or rationalizations are generic, this dimension cannot score above 7.
+**Score cap:** If methodology skills have no shortcut rationalizations, no lazy rationalizations, or rationalizations are generic, this dimension cannot score above 7.
 
 ---
 
