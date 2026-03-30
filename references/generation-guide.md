@@ -1288,7 +1288,7 @@ For each generated file:
 - [ ] **Hooks use validated commands** — hook commands were confirmed installed (Phase 1 should have run `command -v`)
 - [ ] **Workflow connections present** — workflow skills dispatch agents, agents reference methodology skills, methodology skills reference agents (per section 9.8, only for entities that were actually generated)
 - [ ] **Workflow skill dispatch valid** — every agent name in workflow skill dispatch tables refers to an agent that was actually generated
-- [ ] **Behavioral consistency** — Working Style rules in CLAUDE.md align thematically with Anti-Patterns in methodology skills (same themes, no contradictions, no verbatim duplication)
+- [ ] **Behavioral consistency** — Working Style rules in CLAUDE.md and Anti-Patterns in methodology skills address the same bad-habit categories (shortcuts, laziness, hallucination, over-engineering, scope creep, verification) without contradicting each other and without duplicating the exact same rule text verbatim
 
 ### Completeness Checks (hard requirements — fail if missing)
 
