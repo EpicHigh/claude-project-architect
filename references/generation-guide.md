@@ -241,7 +241,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | Testing | Test framework or E2E framework detected (section 8.6) |
 | Linting & Formatting | Linter, formatter, or typecheck command detected (section 8.7) |
 | Code Conventions | Any convention description populated from source files (section 1.5) |
-| Working Style | Always — every project gets 4-6 behavioral rules derived from detected stack intersections |
+| Working Style | Always (at least 2 technologies detected) — 4-6 behavioral rules derived from stack intersections. For single-technology projects, use universal rules from derivation step 4. |
 | Git Conventions | Commit format or branch naming description populated (section 8.12) |
 | Database | Database detected (section 8.9) |
 
@@ -263,10 +263,10 @@ Working Style rules prevent Claude from taking shortcuts. Each rule targets a sp
 
 | Stack Intersection | Rule Title | Rule Why |
 |--------------------|-----------|----------|
-| Next.js + Prisma | Read component boundary before adding data access | Prisma queries belong in Server Components or server actions, never in files with `'use client'` — mixing causes runtime errors |
+| Next.js + Prisma | Read component boundary before adding data access | Prisma queries belong in Server Components or server actions, never in files with `'use client'` — the bundler fails because Prisma depends on Node.js APIs unavailable in the browser |
 | Next.js + App Router | Check `app/` route structure before creating files | This project uses App Router — `page.tsx`, `layout.tsx`, `loading.tsx` have special meanings; misnamed files silently break routing |
 | Go + Ent | Run `go generate ./ent` after schema changes, then read generated types | The generated API in `ent/` changes after every schema modification; coding against stale types causes compile errors |
-| Go + Chi | Read existing middleware chain before adding handlers | Routes inherit middleware from parent `r.Group()` — adding duplicate auth/logging creates subtle double-execution bugs |
+| Go + Gin | Read existing middleware chain before adding handlers | Routes inherit middleware from parent `r.Group()` in Gin — re-registering the same middleware on a child group causes it to run twice for that group's routes |
 | FastAPI + SQLAlchemy | Read existing router structure before adding endpoints | Routes use `Depends(get_db)` for session injection; endpoints that create their own sessions bypass transaction management |
 | FastAPI + Pydantic | Read existing schemas in `schemas/` before creating new ones | This project shares Pydantic models across endpoints; duplicating a schema instead of reusing it causes validation drift |
 | Any + test framework | Run existing tests before and after changes | You cannot distinguish pre-existing failures from regressions you introduced without a baseline |
@@ -482,6 +482,8 @@ Document rationalization patterns — how agents skip steps and why it matters. 
 - **Shortcut:** What the agent will try to skip
 - **Rationalization:** The plausible excuse ("I can infer the schema from the model name")
 - **Consequence:** What goes wrong in THIS project specifically
+
+> **Note:** This format differs from methodology skills' Anti-Patterns (Rationalization / Why it's wrong / Instead) intentionally. Methodology skills target the developer fixing a single task — they need a concrete "Instead" action. Workflow Common Mistakes target multi-phase orchestration — they need to explain the downstream "Consequence" when agents skip a phase.
 ```
 
 **Key structural patterns:**
@@ -1480,7 +1482,8 @@ Quantitative evaluation of all generated outputs as a holistic system. Used duri
 |-------|----------|
 | 0 | Most content is generic framework documentation or boilerplate |
 | 5 | Mix of specific and generic — some lines trace to detections, some are filler |
-| 8 | Every content line traces to a detection, but Working Style section is missing or has fewer than 4 rules |
+| 6 | Content lines trace to detections, but Working Style section is entirely missing |
+| 8 | Every content line traces to a detection, but Working Style has fewer than 4 rules or some rules are generic |
 | 10 | Every content line traces to a specific detection. Working Style has 4-6 stack-specific rules. Removing the project name still identifies the stack. |
 
 **Score cap:** If CLAUDE.md has no Working Style section or rules are generic (could apply to any project), this dimension cannot score above 6.
@@ -1567,7 +1570,8 @@ Quantitative evaluation of all generated outputs as a holistic system. Used duri
 |-------|----------|
 | 0 | INSTRUCTION.md is a placeholder or missing. Invocable skills have vague steps like "validate the code." |
 | 5 | INSTRUCTION.md is present and accurate but missing some outputs. Skills work but some steps lack specificity. |
-| 8 | All outputs documented and actionable, but methodology skills lack structured shortcut rationalizations |
+| 7 | All outputs documented and actionable, but methodology skills have no structured shortcut rationalizations |
+| 8 | All outputs documented and actionable; methodology skills have rationalizations but some are generic or lack project references |
 | 10 | INSTRUCTION.md perfectly summarizes all outputs with working examples. Every invocable skill has concrete, executable steps. Every skill has natural activation triggers. Every methodology skill has at least 2 stack-specific shortcut rationalizations. |
 
 **Score cap:** If methodology skills have no shortcut rationalizations or rationalizations are generic, this dimension cannot score above 7.
