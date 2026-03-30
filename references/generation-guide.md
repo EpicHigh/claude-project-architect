@@ -1561,7 +1561,7 @@ Quantitative evaluation of all generated outputs as a holistic system. Used duri
 | 0 | Agents are stubs (under 40 lines) or missing sections; skills are generic |
 | 5 | Agents meet minimum length but Stack Expertise is thin or generic; skills have some project-specific content |
 | 6 | Agents meet minimum length and have all sections, but some sections contain vague advice ("follow best practices", "ensure quality") instead of project-specific knowledge |
-| 7 | All agents 80+ lines, all sections present with project-specific content, but Anti-Patterns section is missing or has only shortcut rationalizations without lazy rationalizations (or vice versa) |
+| 7 | All agents 80+ lines, all sections present with project-specific content, but methodology skills' Anti-Patterns section is missing or has only shortcut rationalizations without lazy rationalizations (or vice versa) |
 | 8 | All agents 80+ lines, all 7 sections present, content is project-specific but some examples only cover happy paths or lack edge cases |
 | 10 | All agents 80+ lines, all 7 sections present, Stack Expertise is the longest section with project-specific patterns. Skills teach deep methodology with realistic examples covering happy paths and error cases. Zero vague phrases. |
 
