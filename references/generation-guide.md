@@ -153,14 +153,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 {{ end }}
 {{ end }}
 
-{{ if working_style_rules }}
 ## Working Style
 
 Don't take shortcuts — read and explore before writing. Don't be lazy — produce thorough, complete output with proper error handling, validation, and tests. Don't hallucinate — only reference files, APIs, and imports that actually exist. Don't over-engineer — match the existing codebase's complexity level. Stay on scope — only change what was asked. Always verify — run lint and tests before declaring done.
 
 {{ for each working_style_rule }}
 - **{{ rule_title }}** — {{ rule_why }}
-{{ end }}
 {{ end }}
 
 {{ if commit_format_description or branch_naming_description }}
@@ -1516,7 +1514,8 @@ Quantitative evaluation of all generated outputs as a holistic system. Used duri
 | 0 | Most content is generic framework documentation or boilerplate |
 | 5 | Mix of specific and generic — some lines trace to detections, some are filler |
 | 6 | Content lines trace to detections, but Working Style section is entirely missing |
-| 8 | Every content line traces to a detection, but Working Style has fewer than 8 rules or is missing some bad-habit categories |
+| 7 | Every content line traces to a detection; Working Style exists but has fewer than 8 rules or rules lack project-specific anchors |
+| 8 | Every content line traces to a detection; Working Style has 8-12 rules but is missing some bad-habit categories |
 | 10 | Every content line traces to a specific detection. Working Style has 8-12 stack-specific rules covering all relevant bad habits. Removing the project name still identifies the stack. |
 
 **Score cap:** If CLAUDE.md has no Working Style section or rules are generic (could apply to any project), this dimension cannot score above 6.
@@ -1562,6 +1561,7 @@ Quantitative evaluation of all generated outputs as a holistic system. Used duri
 | 0 | Agents are stubs (under 40 lines) or missing sections; skills are generic |
 | 5 | Agents meet minimum length but Stack Expertise is thin or generic; skills have some project-specific content |
 | 6 | Agents meet minimum length and have all sections, but some sections contain vague advice ("follow best practices", "ensure quality") instead of project-specific knowledge |
+| 7 | All agents 80+ lines, all sections present with project-specific content, but Anti-Patterns section is missing or has only shortcut rationalizations without lazy rationalizations (or vice versa) |
 | 8 | All agents 80+ lines, all 7 sections present, content is project-specific but some examples only cover happy paths or lack edge cases |
 | 10 | All agents 80+ lines, all 7 sections present, Stack Expertise is the longest section with project-specific patterns. Skills teach deep methodology with realistic examples covering happy paths and error cases. Zero vague phrases. |
 
@@ -1607,6 +1607,7 @@ Quantitative evaluation of all generated outputs as a holistic system. Used duri
 |-------|----------|
 | 0 | INSTRUCTION.md is a placeholder or missing. Invocable skills have vague steps like "validate the code." |
 | 5 | INSTRUCTION.md is present and accurate but missing some outputs. Skills work but some steps lack specificity. |
+| 6 | All outputs documented and mostly actionable, but some invocable skill steps are vague or INSTRUCTION.md is missing invocation examples |
 | 7 | All outputs documented and actionable, but methodology skills are missing shortcut rationalizations, lazy rationalizations, or both |
 | 8 | All outputs documented and actionable; methodology skills have both rationalization types but some are generic or lack project references |
 | 10 | INSTRUCTION.md perfectly summarizes all outputs with working examples. Every invocable skill has concrete, executable steps. Every skill has natural activation triggers. Every methodology skill has at least 2 stack-specific shortcut rationalizations AND at least 2 lazy rationalizations. |
