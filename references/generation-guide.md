@@ -1274,7 +1274,7 @@ For each generated file:
 - [ ] **Skill description check** — each skill description is ~100 words with 5+ action-verb trigger phrases
 - [ ] **Skill evals check** — each skill has `evals/evals.json` with 2-3 test prompts and discriminating assertions
 - [ ] **Skill size check** — each SKILL.md is under 500 lines
-- [ ] **CLAUDE.md Working Style check** — Working Style section exists with 8-12 rules covering all relevant bad habits, each referencing a detected stack intersection
+- [ ] **CLAUDE.md Working Style check** — Working Style section exists with 8-12 rules covering all relevant bad habits, each referencing a detected technology, file, or directory
 - [ ] **Methodology anti-patterns check** — each methodology skill has at least 2 shortcut rationalizations and 2 lazy rationalizations with project-specific references (file, directory, config)
 - [ ] **No vague filler check** — no generated file contains phrases like "follow best practices", "use appropriate patterns", "ensure quality" without project-specific context
 
@@ -1507,7 +1507,7 @@ Quantitative evaluation of all generated outputs as a holistic system. Used duri
 
 **Definition:** Every line in every generated file traces to a Phase 1 detection. No generic advice.
 
-**Verification action:** For each generated file, read 5 random content lines. For each, identify which Phase 1 detection it traces to. If a line could appear unchanged in any project's config, it fails. Also verify CLAUDE.md contains a Working Style section with 8-12 project-specific behavioral rules covering shortcuts, laziness, hallucination, over-engineering, scope creep, and verification, each referencing a detected technology intersection.
+**Verification action:** For each generated file, read 5 random content lines. For each, identify which Phase 1 detection it traces to. If a line could appear unchanged in any project's config, it fails. Also verify CLAUDE.md contains a Working Style section with 8-12 project-specific behavioral rules covering shortcuts, laziness, hallucination, over-engineering, scope creep, and verification, each referencing a detected technology, file, or directory.
 
 | Score | Criteria |
 |-------|----------|
@@ -1561,8 +1561,8 @@ Quantitative evaluation of all generated outputs as a holistic system. Used duri
 | 0 | Agents are stubs (under 40 lines) or missing sections; skills are generic |
 | 5 | Agents meet minimum length but Stack Expertise is thin or generic; skills have some project-specific content |
 | 6 | Agents meet minimum length and have all sections, but some sections contain vague advice ("follow best practices", "ensure quality") instead of project-specific knowledge |
-| 7 | All agents 80+ lines, all sections present with project-specific content, but methodology skills' Anti-Patterns section is missing or has only shortcut rationalizations without lazy rationalizations (or vice versa) |
-| 8 | All agents 80+ lines, all 7 sections present, content is project-specific but some examples only cover happy paths or lack edge cases |
+| 7 | All agents 80+ lines, all sections present with project-specific content, but skill examples are thin — fewer than 2 Input/Output pairs per skill |
+| 8 | All agents 80+ lines, all 7 sections present with 2+ examples per skill, but examples only cover happy paths without error cases or edge cases |
 | 10 | All agents 80+ lines, all 7 sections present, Stack Expertise is the longest section with project-specific patterns. Skills teach deep methodology with realistic examples covering happy paths and error cases. Zero vague phrases. |
 
 **Score cap:** If any agent section uses generic phrases ("follow best practices", "use appropriate patterns", "ensure quality") without project-specific references, this dimension cannot score above 6.
